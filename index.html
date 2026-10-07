@@ -1,0 +1,2344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cyber Quest - Cybersecurity Corporate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b131b;
+    --panel:#101b26;
+    --text:#dde8ee;
+    --text-dim:#7d94a3;
+    --accent:#28c2d4;
+    --accent-strong:#7fe4ee;
+    --success:#3ddc84;
+    --danger:#ff6b6b;
+    --wall:#3a5568;
+    --floor:#0d1821;
+    --grid-tint: rgba(40,194,212,0.07);
+    color-scheme: dark;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html{zoom:1.2;}
+  *{box-sizing:border-box;}
+  body{
+    background:
+      linear-gradient(var(--grid-tint) 1px, transparent 1px) 0 0/100% 24px,
+      linear-gradient(90deg, var(--grid-tint) 1px, transparent 1px) 0 0/24px 100%,
+      var(--bg);
+    color:var(--text);
+    font-family:'Rajdhani',system-ui,sans-serif;
+    min-height:100%;
+    padding:20px 16px 40px;
+    display:flex;
+    justify-content:center;
+  }
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .display{font-family:'Orbitron',system-ui,sans-serif;}
+
+  .app{width:100%;max-width:620px;display:flex;flex-direction:column;gap:14px;}
+
+  /* ---------- HUD ---------- */
+  .hud{
+    background:var(--panel);
+    border:1px solid var(--wall);
+    padding:14px 16px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    row-gap:8px;
+    position:relative;
+  }
+  .bracket{position:relative;}
+  .bracket::before,.bracket::after{
+    content:"";position:absolute;width:14px;height:14px;
+    border-color:var(--accent);border-style:solid;border-width:0;
+  }
+  .bracket::before{top:-1px;left:-1px;border-top-width:2px;border-left-width:2px;}
+  .bracket::after{bottom:-1px;right:-1px;border-bottom-width:2px;border-right-width:2px;}
+
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{width:30px;height:30px;flex-shrink:0;color:var(--accent);}
+  .brand-mark svg{width:100%;height:100%;filter:drop-shadow(0 0 5px color-mix(in srgb, var(--accent) 45%, transparent));}
+  .hud h1{
+    margin:0;font-size:20px;letter-spacing:1px;color:var(--accent);
+    text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  .hud .tag{display:block;font-size:11px;color:var(--text-dim);letter-spacing:2px;margin-top:2px;text-transform:uppercase;}
+  .hud-right{display:flex;align-items:center;gap:14px;}
+  .counter{text-align:right;}
+  .counter .num{font-family:'Orbitron';font-size:22px;font-variant-numeric:tabular-nums;color:var(--text);}
+  .counter .lbl{font-size:10px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;}
+  .icon-btn{
+    background:transparent;border:1px solid var(--wall);color:var(--text-dim);
+    width:36px;height:36px;font-family:'Orbitron';font-size:14px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .icon-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .icon-btn:focus-visible, button:focus-visible, a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  /* ---------- Monitor / maze ---------- */
+  .monitor{
+    background:var(--panel);
+    border:1px solid var(--wall);
+    padding:16px;
+    position:relative;
+  }
+  .monitor .cornerlabel{
+    position:absolute;top:8px;left:14px;font-size:10px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;
+  }
+  .maze-wrap{width:min(100%,560px);margin:30px auto 6px;}
+  .maze{
+    position:relative;
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    grid-template-rows:repeat(9,1fr);
+    aspect-ratio:12/9;
+    container-type:inline-size;
+    width:100%;
+    background:var(--floor);
+  }
+  .cell{position:relative;}
+  /* Cafe-only dressing: striped awning with a neon OPEN sign above the map */
+  .cafe-awning{
+    display:none;position:relative;height:22px;margin-bottom:4px;border-radius:4px 4px 0 0;
+    background:
+      radial-gradient(circle at 50% 0, transparent 0, transparent 7px, #5a3a28 7px, #5a3a28 8px, transparent 8px) 0 100%/26px 9px repeat-x,
+      repeating-linear-gradient(90deg, #b8412f 0 26px, #f3e6d6 26px 52px);
+    box-shadow:0 3px 0 rgba(0,0,0,.25);
+  }
+  .cafe-awning.show{display:block;}
+  /* Island-only: thatched coconut-hut roof with a bamboo frame */
+  .roof-strip{
+    display:none;height:22px;margin-bottom:3px;border-radius:4px 4px 0 0;
+    background:
+      conic-gradient(from -45deg at 50% 100%, #8a6a2c 90deg, transparent 90deg) 0 100%/14px 8px repeat-x,
+      repeating-linear-gradient(100deg, #8a6a2c 0 3px, #a8843c 3px 6px, #735524 6px 9px) 0 0/100% 15px no-repeat;
+  }
+  .roof-strip.show{display:block;}
+  .maze.island{box-shadow:inset 0 0 0 3px #b8934a, 0 0 0 3px #6b4f22, 0 0 0 5px #3b2c14;}
+  /* Office-only: secure-floor status bar with access LEDs */
+  .tech-strip{
+    display:none;align-items:center;justify-content:space-between;height:22px;margin-bottom:4px;padding:0 10px;
+    font-size:9px;letter-spacing:2px;color:var(--accent-strong);
+    background:linear-gradient(90deg,#0b2430,#0f3040);border:1px solid rgba(127,228,238,0.35);border-radius:3px;
+  }
+  .tech-strip.show{display:flex;}
+  .tech-strip .leds{display:flex;gap:6px;}
+  .tech-strip .leds i{display:block;width:7px;height:7px;border-radius:50%;background:#3ddc84;box-shadow:0 0 6px #3ddc84;animation:ledBlink 2.4s ease-in-out infinite;}
+  .tech-strip .leds i:nth-child(2){background:#ffd558;box-shadow:0 0 6px #ffd558;animation-delay:.6s;}
+  .tech-strip .leds i:nth-child(3){background:#28c2d4;box-shadow:0 0 6px #28c2d4;animation-delay:1.2s;}
+  @keyframes ledBlink{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .maze.office{box-shadow:inset 0 0 0 2px rgba(127,228,238,0.45), 0 0 16px rgba(40,194,212,0.22);}
+  .neon-open{
+    position:absolute;right:10px;top:100%;margin-top:6px;font-size:11px;font-weight:700;letter-spacing:3px;
+    color:#ffd9a0;padding:2px 8px;border:1.5px solid #ff8a5c;border-radius:4px;background:rgba(20,10,6,.85);
+    text-shadow:0 0 6px #ff8a5c,0 0 12px #ff6a3c;box-shadow:0 0 8px rgba(255,138,92,.55);
+    animation:neonFlicker 3.2s steps(1) infinite;z-index:4;
+  }
+  @keyframes neonFlicker{0%,100%{opacity:1;}46%{opacity:1;}47%{opacity:.55;}49%{opacity:1;}72%{opacity:.7;}74%{opacity:1;}}
+  .maze.cafe{box-shadow:inset 0 0 0 3px #5a3a28, 0 0 0 1px #2c1b12;}
+  .maze.cafe .decor{color:#c9a47c;opacity:.38;}
+  .node{
+    position:absolute;
+    display:flex;align-items:center;justify-content:center;
+    width:64%;height:64%;top:18%;left:18%;
+    border-radius:50%;
+    transition:background .25s, box-shadow .25s, transform .25s, color .25s;
+  }
+  .node svg{width:56%;height:56%;stroke:currentColor;}
+  .node-emoji{font-size:4.1cqw;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;}
+  .node.terminal{
+    color:var(--accent);
+    background:color-mix(in srgb, var(--accent) 18%, var(--panel));
+    border:1.5px solid var(--accent);
+    box-shadow:0 0 9px color-mix(in srgb, var(--accent) 50%, transparent);
+    animation:pulse 1.8s ease-in-out infinite;
+  }
+  .node.terminal.solved{
+    color:var(--success);
+    background:color-mix(in srgb, var(--success) 20%, var(--panel));
+    border-color:var(--success);
+    box-shadow:0 0 9px color-mix(in srgb, var(--success) 40%, transparent);
+    animation:none;
+  }
+  .node.exit{
+    width:76%;height:76%;top:12%;left:12%;
+    color:var(--text-dim);
+    border:2px solid var(--text-dim);
+    background:var(--panel);
+  }
+  .node.exit svg{width:60%;height:60%;}
+  .node.exit.open{
+    color:var(--success);
+    border-color:var(--success);
+    box-shadow:0 0 14px color-mix(in srgb, var(--success) 55%, transparent);
+    animation:pulse 1.4s ease-in-out infinite;
+  }
+  .node.key-token{
+    color:#ffd558;
+    background:color-mix(in srgb, #ffd558 18%, var(--panel));
+    border:1.5px solid #ffd558;
+    box-shadow:0 0 14px color-mix(in srgb, #ffd558 65%, transparent), 0 0 26px color-mix(in srgb, #ffd558 30%, transparent);
+    animation:keyGlow 1.8s ease-in-out infinite;
+  }
+  .node.key-token.active{
+    box-shadow:0 0 18px color-mix(in srgb, #ffd558 85%, transparent), 0 0 34px color-mix(in srgb, #ffd558 45%, transparent);
+    animation:pulse 1.2s ease-in-out infinite;
+  }
+  .node.key-token.collected{
+    color:var(--success);
+    background:color-mix(in srgb, var(--success) 20%, var(--panel));
+    border-color:var(--success);
+    box-shadow:0 0 9px color-mix(in srgb, var(--success) 40%, transparent);
+    animation:none;
+  }
+  @keyframes keyGlow{
+    0%,100%{transform:scale(1);filter:brightness(1);}
+    50%{transform:scale(1.05);filter:brightness(1.25);}
+  }
+  .key-wall{
+    position:absolute;inset:3%;
+    background:
+      linear-gradient(var(--wall) 1.5px, transparent 1.5px) 0 0/100% 33.4%,
+      linear-gradient(90deg, var(--wall) 1.5px, transparent 1.5px) 0 0/50% 33.4%,
+      color-mix(in srgb, var(--panel) 82%, var(--wall) 18%);
+    border:2px solid var(--wall);
+    box-shadow:inset 0 0 8px rgba(0,0,0,0.55);
+    opacity:0.78;
+    transition:opacity 1.1s ease, transform 1.1s ease;
+    pointer-events:none;
+    z-index:3;
+  }
+  .key-wall.fade{opacity:0;transform:scale(1.18);}
+  .decor{
+    position:absolute;
+    display:flex;align-items:center;justify-content:center;
+    width:100%;height:100%;
+    color:var(--text-dim);
+    opacity:0.55;
+    pointer-events:none;
+  }
+  .decor svg{width:46%;height:46%;stroke:currentColor;}
+  @keyframes pulse{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.1);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .node.terminal, .node.exit.open, .node.key-token, .node.key-token.active{animation:none;}
+    .key-wall{transition:none;}
+    .neon-open{animation:none;}
+    .tech-strip .leds i{animation:none;}
+    .rack-strip i::after, .torch em, .cafe-awning::after, .roof-strip::after{animation:none;}
+  }
+
+  .player{
+    position:absolute;
+    width:calc(100%/12);height:calc(100%/9);
+    display:flex;align-items:center;justify-content:center;
+    transition:left .15s linear, top .15s linear, transform .15s linear;
+    z-index:5;
+    pointer-events:none;
+  }
+  .player::before{
+    content:"";
+    position:absolute;
+    bottom:8%;left:50%;
+    width:52%;height:16%;
+    transform:translateX(-50%);
+    background:radial-gradient(ellipse, rgba(0,0,0,0.3), transparent 72%);
+    border-radius:50%;
+  }
+  .player.facing-left{transform:scaleX(-1);}
+  .player svg{width:78%;height:78%;filter:drop-shadow(0 0 5px color-mix(in srgb, var(--accent) 65%, transparent));}
+  .player.walking svg{animation:walkBob .32s ease-in-out;}
+  @keyframes walkBob{
+    0%{transform:translateY(0) rotate(0deg);}
+    45%{transform:translateY(-4px) rotate(-4deg);}
+    100%{transform:translateY(0) rotate(0deg);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .player.walking svg{animation:none;}
+  }
+
+  .particle{
+    position:absolute;
+    width:6px;height:6px;
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    animation:burstAnim .55s ease-out forwards;
+    z-index:6;
+    pointer-events:none;
+  }
+  @keyframes burstAnim{
+    0%{transform:translate(-50%,-50%) translate(0,0) scale(1); opacity:1;}
+    100%{transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(0.3); opacity:0;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .particle{display:none;}
+  }
+
+  .ripple{
+    position:absolute;
+    border-radius:50%;
+    border:2px solid;
+    transform:translate(-50%,-50%) scale(0.4);
+    animation:rippleAnim .6s ease-out forwards;
+    z-index:6;
+    pointer-events:none;
+  }
+  @keyframes rippleAnim{
+    0%{transform:translate(-50%,-50%) scale(0.4); opacity:0.9;}
+    100%{transform:translate(-50%,-50%) scale(2.3); opacity:0;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ripple{display:none;}
+  }
+
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--wall);font-size:12px;color:var(--text-dim);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .swatch{width:12px;height:12px;border-radius:50%;display:inline-block;}
+
+  /* On-screen controls: shown on touch devices and narrow screens */
+  .dpad{
+    display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:6px;
+    justify-content:center;margin:6px auto 0;user-select:none;-webkit-user-select:none;
+  }
+  .dpad-btn{
+    display:flex;align-items:center;justify-content:center;
+    background:var(--panel);color:var(--accent-strong);border:1.5px solid var(--accent);border-radius:14px;
+    box-shadow:0 0 10px color-mix(in srgb, var(--accent) 35%, transparent);
+    touch-action:none;-webkit-tap-highlight-color:transparent;padding:0;cursor:pointer;
+  }
+  .dpad-btn svg{width:34px;height:34px;pointer-events:none;}
+  .dpad-btn:active, .dpad-btn.held{background:color-mix(in srgb, var(--accent) 30%, var(--panel));transform:scale(0.95);}
+  .dpad-btn.up{grid-column:2;grid-row:1;}
+  .dpad-btn.left{grid-column:1;grid-row:2;}
+  .dpad-hub{grid-column:2;grid-row:2;}
+  .dpad-btn.right{grid-column:3;grid-row:2;}
+  .dpad-btn.down{grid-column:2;grid-row:3;}
+  /* Office: server-rack LED strip under the map */
+  .rack-strip{
+    display:none;gap:6px;height:16px;margin-top:5px;padding:4px 8px;border:1px solid rgba(127,228,238,0.35);border-radius:3px;
+    background:linear-gradient(90deg,#0b2430,#0f3040);
+  }
+  .rack-strip.show{display:flex;}
+  .rack-strip i{flex:1;border-radius:2px;background:rgba(127,228,238,0.14);box-shadow:inset 0 0 0 1px rgba(127,228,238,0.18);position:relative;}
+  .rack-strip i::after{content:'';position:absolute;right:3px;top:50%;width:4px;height:4px;margin-top:-2px;border-radius:50%;background:#3ddc84;box-shadow:0 0 5px #3ddc84;animation:ledBlink 2.4s ease-in-out infinite;}
+  .rack-strip i:nth-child(3n)::after{background:#ffd558;box-shadow:0 0 5px #ffd558;animation-delay:.5s;}
+  .rack-strip i:nth-child(4n+1)::after{background:#28c2d4;box-shadow:0 0 5px #28c2d4;animation-delay:1.1s;}
+  /* Office: floor power ports */
+  .floor-port{position:absolute;right:7px;bottom:7px;width:9px;height:9px;border:1px solid rgba(127,228,238,0.35);border-radius:2px;background:rgba(127,228,238,0.07);pointer-events:none;}
+  .floor-port::after{content:'';position:absolute;left:50%;top:50%;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:50%;background:rgba(127,228,238,0.55);}
+  /* Cafe: chalkboard menu, fairy lights, coffee-cup stains */
+  .cafe-board{
+    display:none;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 14px;margin-top:5px;padding:6px 10px;
+    font-size:10px;letter-spacing:1px;color:#efe6d2;background:#1b2822;border:3px solid #6b4a30;border-radius:4px;
+    box-shadow:inset 0 0 14px rgba(0,0,0,0.5);
+  }
+  .cafe-board.show{display:flex;}
+  .cafe-board b{color:#ffcf7a;letter-spacing:2px;}
+  .cafe-awning::after{
+    content:'';position:absolute;left:0;right:0;bottom:-6px;height:6px;pointer-events:none;
+    background:radial-gradient(circle, #ffe3a0 0, #ffe3a0 1.6px, rgba(255,200,100,0.35) 2.6px, transparent 3.4px) 0 0/22px 6px repeat-x;
+    animation:twinkle 2.8s ease-in-out infinite;
+  }
+  @keyframes twinkle{0%,100%{opacity:1;}50%{opacity:.55;}}
+  .stain{position:absolute;left:30%;top:28%;width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,220,170,0.13);pointer-events:none;}
+  .stain::after{content:'';position:absolute;inset:-5px 4px 12px -4px;border-radius:50%;border:1px solid rgba(255,220,170,0.08);}
+  /* Island: bamboo beam with tiki torches and a hammock */
+  .hut-beam{
+    display:none;align-items:flex-end;justify-content:space-between;height:38px;margin-top:5px;padding:0 14px;color:#d9b36a;
+    background:repeating-linear-gradient(90deg,#9c7a38 0 38px,#7c5e28 38px 40px) 0 0/100% 7px no-repeat;
+    position:relative;
+  }
+  .hut-beam.show{display:flex;}
+  .hut-beam .hammock{width:150px;height:30px;margin-bottom:2px;}
+  .torch{position:relative;width:5px;height:28px;border-radius:2px;background:linear-gradient(#8a6a2c,#5e451c);}
+  .torch em{
+    position:absolute;left:50%;top:-18px;width:14px;height:20px;margin-left:-7px;border-radius:50% 50% 50% 50% / 62% 62% 38% 38%;
+    background:radial-gradient(ellipse at 50% 70%, #fff3b0 0, #ffb347 45%, #ff6a2c 80%, transparent 100%);
+    box-shadow:0 0 12px 4px rgba(255,150,60,0.55);animation:flame 1.1s ease-in-out infinite alternate;
+  }
+  @keyframes flame{0%{transform:scale(1,1) rotate(-3deg);opacity:.95;}100%{transform:scale(0.88,1.12) rotate(3deg);opacity:.8;}}
+  .roof-strip{position:relative;}
+  .roof-strip::after{
+    content:'';position:absolute;left:0;right:0;bottom:-3px;height:6px;pointer-events:none;
+    background:radial-gradient(circle, #ffe9a8 0, #ffe9a8 1.5px, rgba(255,190,90,0.4) 2.6px, transparent 3.4px) 0 0/20px 6px repeat-x;
+    animation:twinkle 2.2s ease-in-out infinite;
+  }
+  .hint-touch{display:none;}
+  @media (pointer:coarse), (max-width:700px){ .hint-keys{display:none;} .hint-touch{display:inline;} }
+  /* On wide screens the control panel floats at the bottom right so it is always in reach */
+  @media (min-width:1000px) and (pointer:fine){
+    .dpad{
+      position:fixed;right:28px;bottom:24px;z-index:20;margin:0;padding:10px;
+      grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:5px;
+      background:color-mix(in srgb, var(--panel) 88%, transparent);border:1px solid var(--wall);border-radius:16px;
+      box-shadow:0 6px 24px rgba(0,0,0,0.45);
+    }
+    .dpad-btn svg{width:28px;height:28px;}
+  }
+  .hint{text-align:center;font-size:12px;color:var(--text-dim);margin-top:8px;}
+  kbd{font-family:'JetBrains Mono';background:var(--floor);border:1px solid var(--wall);padding:1px 6px;font-size:11px;}
+
+  /* ---------- Overlays ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(8,14,20,0.68);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;z-index:50;
+    opacity:0;pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .card{
+    background:var(--panel);border:1px solid var(--accent);
+    max-width:440px;width:100%;padding:24px;position:relative;
+    max-height:calc(88vh / 1.2);overflow-y:auto;
+    transform:scale(0.94) translateY(6px);
+    transition:transform .22s cubic-bezier(.34,1.4,.64,1);
+  }
+  .overlay.show .card{transform:scale(1) translateY(0);}
+  .card-hero{width:52px;height:52px;margin:0 auto 12px;color:var(--accent);}
+  .card-hero svg{width:100%;height:100%;filter:drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 45%, transparent));}
+  .card h2{margin:0 0 4px;font-size:19px;color:var(--accent);letter-spacing:.5px;text-align:center;}
+  .card .eyebrow{font-size:11px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:6px;display:block;}
+  .card p{font-size:15px;line-height:1.5;color:var(--text);}
+
+  .avatar-picker{display:flex;justify-content:center;gap:10px;margin:10px 0 4px;flex-wrap:wrap;}
+  .avatar-option{
+    width:56px;height:56px;padding:4px;
+    background:var(--floor);border:2px solid var(--wall);border-radius:50%;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .avatar-option svg{width:100%;height:100%;}
+  .avatar-option:hover{border-color:var(--text-dim);}
+  .avatar-option.selected{border-color:var(--accent);box-shadow:0 0 10px color-mix(in srgb, var(--accent) 50%, transparent);}
+
+  .world-list{display:flex;flex-direction:column;gap:10px;margin:10px 0 4px;}
+  .world-card{
+    display:flex;align-items:center;gap:12px;text-align:left;
+    background:var(--floor);border:1.5px solid var(--wall);color:var(--text);
+    padding:10px 12px;cursor:pointer;width:100%;position:relative;
+  }
+  .world-card:hover{border-color:var(--accent);}
+  .world-card.cleared{border-color:var(--success);}
+  .world-card-icon{width:46px;height:46px;flex-shrink:0;color:var(--accent);}
+  .world-card-icon svg{width:100%;height:100%;}
+  .world-card-text{flex:1;min-width:0;}
+  .world-card-kind{font-size:10px;letter-spacing:2px;color:var(--text-dim);}
+  .world-card-title{font-family:'Orbitron';font-weight:800;font-size:22px;line-height:1.15;letter-spacing:.5px;color:var(--text);margin:2px 0 4px;text-shadow:0 0 12px color-mix(in srgb, currentColor 35%, transparent);}
+  .world-card-desc{font-size:12.5px;color:var(--text-dim);margin-top:2px;line-height:1.4;}
+  .world-card-progress{font-size:11px;letter-spacing:1px;color:var(--accent);margin-top:4px;text-transform:uppercase;}
+  .world-card-badge{
+    width:22px;height:22px;flex-shrink:0;border-radius:50%;
+    background:var(--success);color:var(--panel);
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
+  }
+  .btn{
+    font-family:'Orbitron';font-size:12px;letter-spacing:1px;text-transform:uppercase;
+    background:var(--accent);color:#04181c;border:none;
+    padding:12px 18px;cursor:pointer;margin-top:8px;
+  }
+  .btn:hover{background:var(--accent-strong);}
+  .btn.secondary{background:transparent;border:1px solid var(--wall);color:var(--text);}
+  .btn.secondary:hover{border-color:var(--accent);color:var(--accent);}
+
+  .option{
+    display:block;width:100%;text-align:left;
+    background:var(--floor);border:1px solid var(--wall);color:var(--text);
+    padding:11px 14px;margin-top:8px;font-family:'Rajdhani';font-size:15px;font-weight:600;
+    cursor:pointer;white-space:normal;word-wrap:break-word;
+  }
+  .option:hover:not(:disabled){border-color:var(--accent);}
+  .option:disabled{cursor:default;}
+  .option.correct{border-color:var(--success);background:color-mix(in srgb, var(--success) 16%, var(--floor));}
+  .option.wrong{border-color:var(--danger);background:color-mix(in srgb, var(--danger) 16%, var(--floor));}
+  .feedback{margin-top:14px;padding:12px;border-left:3px solid var(--accent);background:var(--grid-tint);font-size:14px;line-height:1.5;}
+  .feedback.ok{border-color:var(--success);}
+  .feedback.no{border-color:var(--danger);}
+  .shake{animation:shake .3s;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-5px);}
+    75%{transform:translateX(5px);}
+  }
+  @media (prefers-reduced-motion: reduce){.shake{animation:none;}}
+
+  .stat-row{display:flex;gap:10px;margin:16px 0;}
+  .stat{flex:1;border:1px solid var(--wall);padding:12px;text-align:center;}
+  .stat .num{font-family:'Orbitron';font-size:24px;color:var(--accent);font-variant-numeric:tabular-nums;}
+  .stat .lbl{font-size:10px;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase;margin-top:4px;}
+  .recap{margin:0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--text-dim);}
+  .recap li{margin-bottom:6px;}
+
+  @media (max-width:400px){
+    .card{padding:18px;}
+  }
+  @media (max-width:480px){
+    .hud{padding:12px;}
+    .hud-right{gap:7px;}
+    .icon-btn{width:34px;height:34px;}
+    .counter .lbl{letter-spacing:1px;}
+  }
+</style>
+
+<div class="app">
+
+  <header class="hud bracket">
+    <div class="brand">
+      <div class="brand-mark" id="brandMark"></div>
+      <div>
+        <h1 class="display">CYBER QUEST</h1>
+        <span class="tag" id="hudTag">Office Security Walkthrough</span>
+      </div>
+    </div>
+    <div class="hud-right">
+      <div class="counter" aria-live="polite">
+        <div class="num"><span id="solvedCount">0</span>/6</div>
+        <div class="lbl">Checkpoints cleared</div>
+        <div class="lbl" id="keyStatusLabel" style="margin-top:2px;">Key: Locked</div>
+      </div>
+      <button class="icon-btn" id="worldsBtn" aria-label="Choose a world" title="Worlds"></button>
+      <button class="icon-btn" id="musicBtn" aria-label="Turn music off" title="Toggle music"></button>
+      <button class="icon-btn" id="soundBtn" aria-label="Mute sound effects" title="Toggle sound">
+      </button>
+      <button class="icon-btn" id="helpBtn" aria-label="Show floor briefing" title="Floor briefing">?</button>
+    </div>
+  </header>
+
+  <div class="monitor">
+    <span class="cornerlabel mono" id="mapLabel">FLOOR PLAN 12&times;9 // CYBER QUEST HQ</span>
+    <div class="maze-wrap">
+      <div class="cafe-awning" id="cafeAwning" aria-hidden="true"><span class="neon-open mono">OPEN</span></div>
+      <div class="roof-strip" id="roofStrip" aria-hidden="true"></div>
+      <div class="tech-strip mono" id="techStrip" aria-hidden="true"><span>SECURE FLOOR // ACCESS LEVEL 1</span><span class="leds"><i></i><i></i><i></i></span></div>
+      <div class="maze" id="maze" role="img" aria-label="World map. Use the arrow keys or WASD to move your avatar."></div>
+      <div class="rack-strip" id="rackStrip" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="cafe-board mono" id="cafeBoard" aria-hidden="true"><b>TODAY'S SPECIAL</b><span>&#9749; Flat white</span><span>&#129360; Croissant</span><span>&#127856; Cake</span></div>
+      <div class="hut-beam" id="hutBeam" aria-hidden="true">
+        <span class="torch"><em></em></span>
+        <svg class="hammock" viewBox="0 0 120 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2V24M114 2V24"/><path d="M6 6L34 20L86 20L114 6"/><path d="M34 20L38 14M50 20L52 14M62 20V14M74 20L72 14M86 20L82 14"/></svg>
+        <span class="torch"><em></em></span>
+      </div>
+    </div>
+    <div class="legend">
+      <span><span class="swatch" style="background:var(--accent)"></span> Checkpoint to clear</span>
+      <span><span class="swatch" style="background:#ffd558"></span> Master key (sealed behind a wall until all 6 are answered)</span>
+      <span><span class="swatch" style="background:var(--success)"></span> Key collected / <span id="legendExitName">Server Room</span> open</span>
+      <span><span class="swatch" style="background:var(--text-dim)"></span> <span id="legendExitName2">Server Room</span> (locked)</span>
+    </div>
+  </div>
+
+  <div class="dpad" id="dpad" role="group" aria-label="On-screen controls">
+    <button type="button" class="dpad-btn up" data-dir="up" aria-label="Move up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15L12 8L18 15"/></svg></button>
+    <button type="button" class="dpad-btn left" data-dir="left" aria-label="Move left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6L8 12L15 18"/></svg></button>
+    <span class="dpad-hub" aria-hidden="true"></span>
+    <button type="button" class="dpad-btn right" data-dir="right" aria-label="Move right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6L16 12L9 18"/></svg></button>
+    <button type="button" class="dpad-btn down" data-dir="down" aria-label="Move down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9L12 16L18 9"/></svg></button>
+  </div>
+
+  <p class="hint"><span class="hint-keys">Move with <kbd>&#8593;</kbd><kbd>&#8595;</kbd><kbd>&#8592;</kbd><kbd>&#8594;</kbd> or <kbd>WASD</kbd>, or use the control panel. </span><span class="hint-touch">Tap or hold the arrows to move. </span>Walk into a checkpoint to answer its question.</p>
+
+</div>
+
+<!-- World select overlay -->
+<div class="overlay" id="worldSelect">
+  <div class="card" style="max-width:480px;">
+    <div class="card-hero" id="worldSelectHero"></div>
+    <span class="eyebrow mono" style="text-align:center;">&gt; VAULT_ACCESS</span>
+    <h2 class="display">Choose Your World</h2>
+    <p>Clear all 6 checkpoints in each world, then collect its master key, to unlock the Security Gate and open the Vault Door.</p>
+    <p class="eyebrow mono" id="vaultProgressLabel" style="text-align:center;">VAULT PROGRESS: 0/3 KEYS</p>
+    <div class="world-list" id="worldList"></div>
+    <button class="btn secondary" id="worldBackBtn" style="display:none;width:100%;">Back to Game</button>
+  </div>
+</div>
+
+<!-- Briefing overlay -->
+<div class="overlay" id="briefing">
+  <div class="card">
+    <div class="card-hero" id="briefingHero"></div>
+    <span class="eyebrow mono" id="briefingEyebrow" style="text-align:center;">&gt; FLOOR_BRIEFING</span>
+    <h2 class="display" id="briefingTitle">Welcome to the Floor</h2>
+    <div id="briefingBody"></div>
+    <p style="color:var(--text-dim);font-size:13px;">Every scenario here is grounded in everyday situations, not technical trivia.</p>
+    <p class="eyebrow mono" style="text-align:center;margin-top:10px;">&gt; CHOOSE YOUR AVATAR</p>
+    <div class="avatar-picker" id="avatarPicker"></div>
+    <button class="btn" id="startBtn" style="display:block;width:100%;">Start Walkthrough</button>
+    <button class="btn secondary" id="briefingWorldsBtn" style="display:block;width:100%;">Choose a Different World</button>
+  </div>
+</div>
+
+<!-- Mastery finale overlay -->
+<div class="overlay" id="masteryScreen">
+  <div class="card">
+    <div class="card-hero" id="masteryHero"></div>
+    <span class="eyebrow mono" style="text-align:center;">&gt; VAULT_UNLOCKED</span>
+    <h2 class="display">Cybersecurity Mastery: Level 1</h2>
+    <p>All 3 master keys are in. The Security Gate has opened, the Vault Door is unlocked, and you've cleared every world.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="num" id="masteryKeys">3/3</div><div class="lbl">Keys collected</div></div>
+      <div class="stat"><div class="num" id="masteryFirstTry">0/18</div><div class="lbl">First-try correct</div></div>
+    </div>
+    <button class="btn" id="masteryReplayBtn" style="display:block;width:100%;">Play Again From Start</button>
+    <button class="btn secondary" id="masteryCloseBtn" style="display:block;width:100%;">Close</button>
+  </div>
+</div>
+
+<!-- Quiz overlay -->
+<div class="overlay" id="quiz">
+  <div class="card" id="quizCard">
+    <span class="eyebrow mono" id="quizTag">&gt; CHECKPOINT</span>
+    <h2 class="display" id="quizTitle" style="text-align:left;">Security Check</h2>
+    <p id="quizPrompt"></p>
+    <div id="quizOptions"></div>
+    <div class="feedback" id="quizFeedback" hidden></div>
+    <button class="btn" id="quizContinue" hidden>Continue</button>
+  </div>
+</div>
+
+<!-- Win overlay -->
+<div class="overlay" id="winScreen">
+  <div class="card">
+    <span class="eyebrow mono" style="text-align:center;">&gt; ACCESS_GRANTED</span>
+    <h2 class="display" id="winTitle">World Cleared</h2>
+    <p id="winSummary">All 3 keys collected. You've badged safely through.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="num" id="finalSolved">6/6</div><div class="lbl">Checkpoints cleared</div></div>
+      <div class="stat"><div class="num" id="finalFirstTry">0/6</div><div class="lbl">First-try correct</div></div>
+    </div>
+    <p style="font-size:13px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;margin-bottom:6px;">Habits to carry with you</p>
+    <ul class="recap" id="recapList"></ul>
+    <button class="btn" id="winPrimaryBtn" style="display:block;width:100%;">Choose Next World</button>
+    <button class="btn secondary" id="playAgainBtn" style="display:block;width:100%;">Replay This World</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Icon library: 24x24, straight lines + native rect/circle only ----------
+  var ICON_PATHS = {
+    envelope: '<rect x="3" y="6" width="18" height="13" rx="1.5"/><path d="M3 7L12 13L21 7"/>',
+    key: '<circle cx="8" cy="12" r="4"/><path d="M12 12H21M17 12V15M20 12V15"/>',
+    shield: '<path d="M12 3L19 6L19 11L12 21L5 11L5 6Z"/><path d="M8.5 12.5L11 15L16 9"/>',
+    signal: '<rect x="4" y="16" width="3" height="5" fill="currentColor" stroke="none"/><rect x="10.5" y="12" width="3" height="9" fill="currentColor" stroke="none"/><rect x="17" y="7" width="3" height="14" fill="currentColor" stroke="none"/>',
+    door: '<rect x="6" y="3" width="12" height="18" rx="1"/><circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/>',
+    usb: '<rect x="8" y="9" width="8" height="12" rx="1"/><path d="M10 9V5H14V9"/><path d="M11 5V3M13 5V3"/>',
+    plane: '<path d="M3 11L21 3L13 21L11 13L3 11Z"/>',
+    phone: '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M9 6H15"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/>',
+    qr: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14.5" y="14.5" width="2.5" height="2.5" fill="currentColor" stroke="none"/><rect x="18.5" y="14.5" width="2.5" height="2.5" fill="currentColor" stroke="none"/><rect x="14.5" y="18.5" width="2.5" height="2.5" fill="currentColor" stroke="none"/>',
+    lock: '<rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7H16V11"/>',
+    trash: '<path d="M4 7H20"/><path d="M6 7L7 21H17L18 7"/><path d="M10 3H14L15 7H9Z"/>',
+    headset: '<path d="M4 13V9H20V13"/><rect x="3" y="12" width="4" height="7" rx="1"/><rect x="17" y="12" width="4" height="7" rx="1"/>',
+    plant: '<path d="M9 21H15L14 17H10Z"/><path d="M12 17V11"/><path d="M12 13L8 9"/><path d="M12 13L16 9"/>',
+    coffee: '<path d="M6 9H16V16H6Z"/><path d="M16 11H19V14H16Z"/><path d="M9 7V5M13 7V5"/>',
+    printer: '<path d="M7 9V4H17V9"/><rect x="4" y="9" width="16" height="7" rx="1"/><rect x="8" y="14" width="8" height="6"/>',
+    cabinet: '<rect x="5" y="3" width="14" height="18"/><path d="M5 10H19M5 17H19"/><path d="M9 6.5H11M9 13.5H11"/>',
+    chair: '<path d="M6 4H15V13H6Z"/><path d="M6 13V20M15 4V13"/><path d="M6 20H10M13 20H15"/>',
+    server: '<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M5 9H19M5 15H19"/><circle cx="8" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="8" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="8" cy="18" r="1" fill="currentColor" stroke="none"/>',
+    speakerOn: '<path d="M3 9H7L12 4V20L7 15H3Z"/><path d="M15 8L18 5M15 12H19M15 16L18 19"/>',
+    speakerOff: '<path d="M3 9H7L12 4V20L7 15H3Z"/><path d="M15 9L19 13M19 9L15 13"/>',
+    wifi: '<path d="M4 9L12 3L20 9"/><path d="M7 13L12 9L17 13"/><circle cx="12" cy="18" r="1.3" fill="currentColor" stroke="none"/>',
+    router: '<rect x="4" y="13" width="16" height="7" rx="1"/><path d="M8 13V8M16 13V8"/><circle cx="8" cy="17" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>',
+    plug: '<path d="M9 2V8M15 2V8"/><rect x="6" y="8" width="12" height="9" rx="1"/><path d="M12 17V22"/>',
+    bluetooth: '<path d="M12 4L17 8L7 16L12 20M12 4V20M7 8L17 16"/>',
+    eye: '<path d="M2 12L12 5L22 12L12 19Z"/><rect x="10" y="10" width="4" height="4"/>',
+    smartSpeaker: '<rect x="8" y="3" width="8" height="18" rx="4"/><circle cx="12" cy="9" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="13" r="1" fill="currentColor" stroke="none"/>',
+    screen: '<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M9 20H15M12 16V20"/>',
+    pin: '<path d="M12 2L17 8L12 16L7 8Z"/><circle cx="12" cy="8" r="2"/>',
+    chat: '<path d="M4 5H20V16H9L4 20Z"/>',
+    id: '<rect x="3" y="6" width="18" height="12" rx="1.5"/><circle cx="8" cy="12" r="2"/><path d="M13 10H18M13 14H16"/>',
+    gift: '<rect x="4" y="10" width="16" height="10"/><path d="M4 10H20M12 10V20"/><path d="M9 10L7 5L12 10L17 5L15 10"/>',
+    bag: '<path d="M6 8H18L17 21H7Z"/><path d="M9 8V6H15V8"/>',
+    warning: '<path d="M12 3L22 20H2Z"/><path d="M12 9V14"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>',
+    heart: '<path d="M12 21L5 14L5 8L8 5L12 9L16 5L19 8L19 14Z"/>',
+    palm: '<path d="M12 22V14"/><path d="M12 14L5 11M12 14L19 11M12 14L7 6M12 14L17 6"/>',
+    umbrella: '<path d="M12 3L2 14H22Z"/><path d="M12 14V21"/><path d="M9 21H15"/>',
+    boat: '<path d="M4 16H20L17 21H7Z"/><path d="M12 16V4"/><path d="M12 6L18 10L12 14Z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2V5M12 19V22M2 12H5M19 12H22M4.5 4.5L6.5 6.5M17.5 17.5L19.5 19.5M4.5 19.5L6.5 17.5M17.5 6.5L19.5 4.5"/>',
+    grid: '<rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/>',
+    vault: '<rect x="3" y="3" width="18" height="18" rx="1.5"/><circle cx="12" cy="12" r="4"/><path d="M12 8V9M12 15V16M8 12H9M15 12H16"/>',
+    croissant: '<path d="M3 15L6 9L10 7L14 7L18 9L21 15L18 14L15 11L9 11L6 14Z"/><path d="M10 7L9 11M14 7L15 11"/>',
+    espresso: '<rect x="4" y="3" width="16" height="12" rx="1"/><path d="M4 7H20"/><path d="M10 10H14V13H10Z"/><path d="M6 15V20H18V15"/>',
+    table: '<rect x="4" y="6" width="16" height="3" rx="1.5"/><path d="M12 9V19M8 19H16"/>',
+    laptop: '<rect x="5" y="5" width="14" height="9" rx="1"/><path d="M3 18H21L19 14H5Z"/>',
+    pastryCase: '<rect x="3" y="8" width="18" height="11" rx="1"/><path d="M3 13H21"/><circle cx="8" cy="10.5" r="1"/><circle cx="12" cy="10.5" r="1"/><circle cx="16" cy="10.5" r="1"/>',
+    menuBoard: '<rect x="5" y="3" width="14" height="14" rx="1"/><path d="M8 7H16M8 10H16M8 13H13"/><path d="M8 17L6 21M16 17L18 21"/>',
+    wrench: '<circle cx="15" cy="9" r="4"/><path d="M12 12L5 19L7 21L14 14"/>',
+    passcode: '<rect x="3" y="7" width="18" height="10" rx="1.5"/><circle cx="8" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="1" fill="currentColor" stroke="none"/>',
+    person: '<circle cx="12" cy="8" r="4"/><path d="M4 21L6 15H18L20 21Z"/>',
+    music: '<path d="M9 18V5L19 3V16"/><path d="M9 9L19 7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="16" r="2"/>',
+    musicOff: '<path d="M9 18V5L19 3V16"/><path d="M9 9L19 7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="16" r="2"/><path d="M3 3L21 21"/>',
+    trophy: '<path d="M7 4H17L15 12H9Z"/><path d="M7 6H4V9H7M17 6H20V9H17"/><path d="M12 12V17"/><path d="M8 20H16L15 17H9Z"/>'
+  };
+  function svgIcon(id){
+    var inner = ICON_PATHS[id] || '';
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>';
+  }
+
+  // ---------- Verified maze data (12x9 per world, seeded generation, 0 unreachable cells) ----------
+  var W = 12, H = 9;
+  var OFFICE_CELLS = [
+    [{"N":true,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":true}],
+    [{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":false}],
+    [{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":false,"S":false,"W":false},{"N":true,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":true,"W":true}],
+    [{"N":false,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false}],
+    [{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":true},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false}]
+  ];
+  // Every world has its own maze, start and exit. These globals are re-pointed at the
+  // current world by applyWorldLayout() whenever a world is entered or restarted.
+  var CAFE_CELLS = [
+    [{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":true},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":false,"W":false}],
+    [{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":false,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false}],
+    [{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":true,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":true}]
+  ];
+  var ISLAND_CELLS = [
+    [{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":true,"W":true},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":true}],
+    [{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":false,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":true,"E":false,"S":true,"W":true},{"N":false,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false}],
+    [{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":true,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":true},{"N":false,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false}]
+  ];
+  var OFFICE_START = {x:0,y:0}, OFFICE_EXIT = {x:11,y:0};
+  var CAFE_START = {x:11,y:8}, CAFE_EXIT = {x:0,y:0};
+  var ISLAND_START = {x:0,y:8}, ISLAND_EXIT = {x:11,y:0};
+  var CELLS = OFFICE_CELLS;
+  var START = OFFICE_START;
+  var EXIT = OFFICE_EXIT;
+  // 6 quiz checkpoints and 1 master key per world. Each world has its own layout
+  // (verified-reachable on that world's maze); applyWorldLayout() points these at the
+  // current world. The key stays locked until all 6 checkpoints are answered correctly.
+  var OFFICE_CHECKPOINTS = [{x:3,y:5},{x:4,y:5},{x:10,y:5},{x:9,y:4},{x:3,y:0},{x:7,y:0}];
+  var OFFICE_KEY = {x:10,y:0};
+  var CAFE_CHECKPOINTS = [{x:0,y:3},{x:7,y:4},{x:1,y:8},{x:8,y:6},{x:5,y:7},{x:6,y:6}];
+  var CAFE_KEY = {x:1,y:2};
+  var ISLAND_CHECKPOINTS = [{x:1,y:4},{x:6,y:0},{x:4,y:8},{x:11,y:6},{x:6,y:8},{x:0,y:1}];
+  var ISLAND_KEY = {x:5,y:7};
+  var CHECKPOINT_POS = OFFICE_CHECKPOINTS;
+  var KEY_TOKEN_POS = OFFICE_KEY;
+
+  var OFFICE_DECOR = [
+  ];
+  var OFFICE_ZONES = [
+    {x0:0,x1:5,y0:0,y1:4,label:'IT WING'},
+    {x0:6,x1:11,y0:0,y1:4,label:'MEETING SUITE'},
+    {x0:0,x1:5,y0:5,y1:8,label:'OPEN-PLAN FLOOR'},
+    {x0:6,x1:11,y0:5,y1:8,label:'PANTRY & BREAK AREA'}
+  ];
+  var CAFE_DECOR = [
+  ];
+  var CAFE_ZONES = [
+    {x0:0,x1:5,y0:0,y1:4,label:'ORDER COUNTER'},
+    {x0:6,x1:11,y0:0,y1:4,label:'STUDY NOOK'},
+    {x0:0,x1:5,y0:5,y1:8,label:'OUTDOOR PATIO'},
+    {x0:6,x1:11,y0:5,y1:8,label:'STAFF CORRIDOR'}
+  ];
+  var ISLAND_DECOR = [
+  ];
+  var ISLAND_ZONES = [
+    {x0:0,x1:5,y0:0,y1:4,label:'COCONUT BAR'},
+    {x0:6,x1:11,y0:0,y1:4,label:'FISHING HUT'},
+    {x0:0,x1:5,y0:5,y1:8,label:'HAMMOCK GROVE'},
+    {x0:6,x1:11,y0:5,y1:8,label:'PIER & DOCKS'}
+  ];
+
+  // ---------- Worlds: each shares the same verified maze shape, reskinned ----------
+  var OFFICE_BANK = [
+    {
+      icon:'envelope', emoji:'📧', station:'Inbox Check',
+      prompt:"An email looks like it's from your bank, pushing you to click a link now or lose account access. Best first move?",
+      options:[
+        "Click the link and log in right away",
+        "Call the bank on the number from your card, not the email",
+        "Reply to the email asking if it's real"
+      ],
+      correct:1,
+      explanation:"Banks don't lock accounts by email. Verify only through a number or app you already trust."
+    },
+    {
+      icon:'wrench', emoji:'💻', station:'IT Help Desk',
+      prompt:"What keeps your work accounts safest?",
+      options:[
+        "One strong password used everywhere",
+        "A unique password per account, kept in a password manager",
+        "Writing your password on a sticky note"
+      ],
+      correct:1,
+      explanation:"One leaked password can open every account if reused. A password manager makes unique passwords easy."
+    },
+    {
+      icon:'shield', emoji:'🔐', station:'Login Screen',
+      prompt:"Your company turns on two-factor login (MFA). Why does it help, even if your password leaks?",
+      options:[
+        "It makes your password longer",
+        "It needs a second proof, like a phone code, a thief won't have",
+        "It blocks phishing emails from arriving"
+      ],
+      correct:1,
+      explanation:"Even with a stolen password, a thief usually can't get in without your phone too."
+    },
+    {
+      icon:'signal', emoji:'🤝', station:'Client Meeting Room',
+      prompt:"You're on a client's guest wifi and need to check work email. Safer move?",
+      options:[
+        "Just connect, it's only for a bit",
+        "Turn on your company VPN first",
+        "Turn off your antivirus so it runs faster"
+      ],
+      correct:1,
+      explanation:"Others on the same network can watch unencrypted traffic. A VPN keeps your connection private."
+    },
+    {
+      icon:'door', emoji:'🚪', station:'Office Entrance',
+      prompt:"Someone with no visible pass tags close behind you at the turnstile, saying they forgot their card. What do you do?",
+      options:[
+        "Let them in, it's polite",
+        "Ask them to tap their own pass or register at reception",
+        "Ignore them and keep walking"
+      ],
+      correct:1,
+      explanation:"This is tailgating. A friendly excuse is often all it takes to slip in. Every pass, every time."
+    },
+    {
+      icon:'usb', emoji:'📬', station:'Mailroom',
+      prompt:"An unlabeled USB drive marked “Bonus List 2026” sits on the mailroom counter. What's right?",
+      options:[
+        "Plug it into your laptop to check",
+        "Hand it to IT or security, unopened",
+        "Plug it into your personal phone instead"
+      ],
+      correct:1,
+      explanation:"Unknown USB drives are a classic trap, and a tempting label is exactly the bait. Let IT check it safely."
+    },
+    {
+      icon:'plane', emoji:'💼', station:'Open-Plan Desk',
+      prompt:"A colleague asks you to send a client list to their personal Gmail so they can work on it tonight. What's right?",
+      options:[
+        "Send it, it's urgent",
+        "Use the company's approved file-sharing tool instead",
+        "Password-protect it and send it to the personal email anyway"
+      ],
+      correct:1,
+      explanation:"Personal apps aren't secured to company standard. Client data should move through approved channels only."
+    },
+    {
+      icon:'phone', emoji:'🛗', station:'Lift Lobby',
+      prompt:"An SMS says “Your parcel is held, pay $2.50 to release it” with a link, but you aren't expecting one. Safest response?",
+      options:[
+        "Pay the small fee",
+        "Click the link to check the tracking number",
+        "Delete it, and check deliveries only through the courier's official app"
+      ],
+      correct:2,
+      explanation:"This is phishing by text message. A small, urgent fee is designed to feel too minor to question. Check deliveries only through official channels."
+    },
+    {
+      icon:'qr', emoji:'📌', station:'Pantry Noticeboard',
+      prompt:"A poster QR code offers a “free lucky draw” if you scan it and log in with your work email and password. What do you do?",
+      options:[
+        "Scan it, free prizes are worth a try",
+        "Don't scan it, and report the poster to IT",
+        "Scan it on your personal phone instead"
+      ],
+      correct:1,
+      explanation:"QR codes hide the real link until scanned. A “log in to win” page is a common way to steal work credentials."
+    },
+    {
+      icon:'lock', emoji:'🪑', station:'Hot-Desk Zone',
+      prompt:"You step away from your hot-desk for a 10-minute coffee break. Right habit?",
+      options:[
+        "Leave it, you'll be back soon",
+        "Lock your screen every time, even for a short break",
+        "Just close the laptop lid"
+      ],
+      correct:1,
+      explanation:"An unlocked screen is an open door, even for ten minutes. Locking it closes that gap."
+    },
+    {
+      icon:'trash', emoji:'🖨️', station:'Print & Shred Corner',
+      prompt:"You printed a client contract by mistake and don't need the copy. What do you do with it?",
+      options:[
+        "Toss it in general recycling",
+        "Leave it on the printer tray for now",
+        "Shred it, or use the confidential-waste bin"
+      ],
+      correct:2,
+      explanation:"Recycling bins and desks aren't secure. Confidential paper should go through a shredder or a locked waste bin."
+    },
+    {
+      icon:'headset', emoji:'☎️', station:'Support Line',
+      prompt:"A caller claims to be “Head Office IT” and asks you to read out the OTP that just landed on your phone. What do you do?",
+      options:[
+        "Read it out, they said they're IT",
+        "Say no, hang up, and verify through your official IT contact number",
+        "Read out only half of it"
+      ],
+      correct:1,
+      explanation:"Real IT never needs your OTP. This is impersonation, hang up and verify separately."
+    }
+  ];
+
+  var CAFE_BANK = [
+    {
+      icon:'wifi', emoji:'🍽️', station:'Wifi Menu Card',
+      prompt:"You see two cafe wifi networks with almost the same name, “Free_Cafe_WiFi” and “Free_Cafe_WiFi_2.” What's the safest move?",
+      options:[
+        "Join whichever connects faster",
+        "Ask staff which network is the real one",
+        "Join both to see which works"
+      ],
+      correct:1,
+      explanation:"Look-alike hotspots are a common trick to snoop on your traffic. Confirm the real network name with staff."
+    },
+    {
+      icon:'router', emoji:'🍳', station:'Kitchen Router',
+      prompt:"You just got a new home wifi router. What's the most important first step?",
+      options:[
+        "Leave the default admin password as is",
+        "Change the default admin password and wifi name",
+        "Place it near a window for better signal"
+      ],
+      correct:1,
+      explanation:"Default router passwords are public knowledge. Changing them is the first real lock on your home network."
+    },
+    {
+      icon:'passcode', emoji:'🧋', station:'Bubble Tea Bar',
+      prompt:"You use the same password for your email, banking, and social media. What's the biggest risk?",
+      options:[
+        "Nothing, it's easier to remember",
+        "If one account leaks, all your accounts are at risk",
+        "It only matters for banking apps"
+      ],
+      correct:1,
+      explanation:"One leaked password can unlock every account that shares it. Unique passwords limit the damage."
+    },
+    {
+      icon:'plug', emoji:'🧃', station:'Juice & Charge Bar',
+      prompt:"Your phone is low and a cafe offers a free public USB charging station. What's the safer choice?",
+      options:[
+        "Plug in and charge as normal",
+        "Use your own power bank or wall adapter instead",
+        "Charge it but turn off wifi first"
+      ],
+      correct:1,
+      explanation:"Public USB ports can be rigged to steal data, known as juice jacking. A power bank avoids the data link entirely."
+    },
+    {
+      icon:'bluetooth', emoji:'☕', station:'Coffee Corner',
+      prompt:"Your headphones show an unfamiliar device asking to pair while you're in a cafe. What should you do?",
+      options:[
+        "Accept it, it's probably harmless",
+        "Decline it and check your own device's Bluetooth name",
+        "Accept once, then disconnect quickly"
+      ],
+      correct:1,
+      explanation:"Unknown pairing requests can be an attempt to access your device. Only accept ones you started yourself."
+    },
+    {
+      icon:'eye', emoji:'🥐', station:'Pastry Queue',
+      prompt:"You need to enter your banking PIN while someone stands close behind you in a queue. What's the right habit?",
+      options:[
+        "Type quickly so they can't see",
+        "Shield the screen or keypad with your hand",
+        "Wait until they leave the store"
+      ],
+      correct:1,
+      explanation:"Shielding your PIN or password takes a second and blocks shoulder surfing completely."
+    },
+    {
+      icon:'laptop', emoji:'🗑️', station:'Clear-Up Station',
+      prompt:"Your browser offers to save your password after every login. What's the safer habit?",
+      options:[
+        "Save everything in the browser for convenience",
+        "Use a dedicated password manager instead",
+        "Never save anything, retype every time"
+      ],
+      correct:1,
+      explanation:"A password manager encrypts your passwords properly, unlike basic browser storage on a shared device."
+    },
+    {
+      icon:'smartSpeaker', emoji:'🍲', station:'Soup Station',
+      prompt:"You've set up a smart speaker at home that's always listening for its wake word. What's a good privacy habit?",
+      options:[
+        "Leave all settings on default",
+        "Review its privacy settings and mute it when not needed",
+        "Place it in every room for convenience"
+      ],
+      correct:1,
+      explanation:"Checking privacy settings and muting the mic when it's not needed limits what the device can pick up."
+    },
+    {
+      icon:'screen', emoji:'🍰', station:'Cake Counter',
+      prompt:"You've shared your streaming account password with several friends outside your household. What's the risk?",
+      options:[
+        "No risk, it's just a streaming account",
+        "More people with your password means more chances it leaks",
+        "It only affects your streaming recommendations"
+      ],
+      correct:1,
+      explanation:"Every extra person who has your password is another way it can leak, especially if they reuse it elsewhere."
+    },
+    {
+      icon:'signal', emoji:'🍵', station:'Matcha Corner',
+      prompt:"Your phone is set to auto-connect to any wifi network it's seen before. What's the safer setting?",
+      options:[
+        "Leave it on, it's convenient",
+        "Turn off auto-connect for open networks",
+        "Only auto-connect at night"
+      ],
+      correct:1,
+      explanation:"Auto-connect can link you to a fake copycat network without you noticing."
+    },
+    {
+      icon:'lock', emoji:'💳', station:'Card Terminal',
+      prompt:"You use the same PIN for your phone, banking app, and door access code. What's the concern?",
+      options:[
+        "It's fine, PINs are short anyway",
+        "If one PIN is seen or guessed, everything using it is exposed",
+        "Only banking PINs need to be different"
+      ],
+      correct:1,
+      explanation:"A shared PIN means one moment of exposure compromises everything else that uses it."
+    },
+    {
+      icon:'pin', emoji:'🪑', station:'Patio Seats',
+      prompt:"You post your real-time location publicly while out with friends. What's the safer habit?",
+      options:[
+        "Keep it public so friends can find you",
+        "Share your location only with people you trust",
+        "Turn off location sharing once you're famous"
+      ],
+      correct:1,
+      explanation:"Public real-time location can be seen by anyone, not just friends. Share it only with people you trust."
+    }
+  ];
+
+  var ISLAND_BANK = [
+    {
+      icon:'envelope', emoji:'🍾', station:'Bottle Message',
+      prompt:"An email says you've won a prize and just need to enter your bank details to claim it. What do you do?",
+      options:[
+        "Enter the details to claim the prize",
+        "Delete it, real prizes don't ask for bank details by email",
+        "Reply asking for more proof first"
+      ],
+      correct:1,
+      explanation:"Legitimate prizes never ask for your bank details by email. This is a classic phishing lure."
+    },
+    {
+      icon:'person', emoji:'🦜', station:'Parrot Post',
+      prompt:"An email looks like it's from a friend, asking you to click a link to see trip photos. Something feels off. Safest move?",
+      options:[
+        "Click it, it's from a friend",
+        "Check with your friend another way before clicking",
+        "Forward it to other friends first"
+      ],
+      correct:1,
+      explanation:"This is phishing. It fakes a familiar name to earn your trust. Confirm through a separate channel first."
+    },
+    {
+      icon:'phone', emoji:'🐚', station:'Shell Phone',
+      prompt:"Someone calls claiming to be your bank's fraud team, asking you to confirm your card number and OTP. What do you do?",
+      options:[
+        "Give the details, they said it's urgent",
+        "Hang up and call your bank on the number on your card",
+        "Give only the last 4 digits"
+      ],
+      correct:1,
+      explanation:"This is phishing by phone. Banks never ask for your OTP. Verify by calling the number on your card."
+    },
+    {
+      icon:'chat', emoji:'⛵', station:'Boat Delivery',
+      prompt:"A text with a link says a delivery couldn't be made and needs a small fee to redeliver. Safest response?",
+      options:[
+        "Click the link and pay the fee",
+        "Delete it, and check deliveries only through the courier's app",
+        "Reply asking who sent it"
+      ],
+      correct:1,
+      explanation:"This is phishing by text message. A small urgent fee is designed to feel too minor to question."
+    },
+    {
+      icon:'door', emoji:'🌴', station:'Palm Hut Door',
+      prompt:"Someone at your door says they're from the water company and needs your ID and a recent bill to “verify” your account. What do you do?",
+      options:[
+        "Show them your ID and bill",
+        "Ask for their staff ID and call the company's official number to confirm",
+        "Let them in but don't say much"
+      ],
+      correct:1,
+      explanation:"This is pretexting, a made-up reason to get your personal details. Verify with the company's official number."
+    },
+    {
+      icon:'headset', emoji:'⚓', station:'Coast Guard Call',
+      prompt:"A caller says they're from a government agency and threatens a fine unless you confirm your ID number right now. What do you do?",
+      options:[
+        "Give the ID number to avoid the fine",
+        "Hang up and check directly with the agency",
+        "Ask them to email you instead"
+      ],
+      correct:1,
+      explanation:"Real agencies don't threaten instant fines by phone. The pressure is designed to stop you thinking it through."
+    },
+    {
+      icon:'usb', emoji:'🎣', station:'Bait Shop',
+      prompt:"You receive a free branded USB drive at an event with no idea who it's really from. What's the right move?",
+      options:[
+        "Plug it in to see what's on it",
+        "Don't plug it in, hand it to IT or dispose of it safely",
+        "Give it to a friend to try first"
+      ],
+      correct:1,
+      explanation:"This is baiting. An unknown drive can carry malware the moment it's plugged in."
+    },
+    {
+      icon:'bag', emoji:'🐟', station:'Fish Market',
+      prompt:"An ad offers a popular gadget at 90% off, only through a link, payable by bank transfer. Safest response?",
+      options:[
+        "Transfer the money before it sells out",
+        "Skip it, and only buy through trusted, verified stores",
+        "Ask the seller for their bank account name first"
+      ],
+      correct:1,
+      explanation:"Deals that seem too good to be true, with unusual payment methods, are common bait for scams."
+    },
+    {
+      icon:'gift', emoji:'💰', station:'Treasure Chest',
+      prompt:"A site offers a paid movie or app for free if you download their special player first. What do you do?",
+      options:[
+        "Download it, free content is worth it",
+        "Avoid it, unofficial downloads often carry malware",
+        "Download it on a work laptop instead"
+      ],
+      correct:1,
+      explanation:"Free downloads from unofficial sites are a classic way to install malware."
+    },
+    {
+      icon:'warning', emoji:'🦈', station:'Shark Warning',
+      prompt:"Your browser shows a pop-up saying your device is infected and to call a number immediately. Right move?",
+      options:[
+        "Call the number shown",
+        "Close the pop-up and run a scan with trusted antivirus software",
+        "Restart your device and hope it goes away"
+      ],
+      correct:1,
+      explanation:"This is scareware. Real security alerts don't ask you to call a random number."
+    },
+    {
+      icon:'qr', emoji:'🐠', station:'Reef Quiz',
+      prompt:"A social media quiz asks for your first pet's name, mother's maiden name, and birth town for “fun results.” What should you do?",
+      options:[
+        "Answer it, it's just a game",
+        "Skip it, these are common security question answers",
+        "Answer with fake but similar details"
+      ],
+      correct:1,
+      explanation:"Quizzes like this quietly collect answers used to reset your accounts."
+    },
+    {
+      icon:'heart', emoji:'🌊', station:'Wave Appeal',
+      prompt:"After a disaster, a social post asks for urgent donations through a personal bank transfer link. Safest response?",
+      options:[
+        "Transfer money right away to help",
+        "Donate only through verified charity websites",
+        "Share the post so others can help too"
+      ],
+      correct:1,
+      explanation:"Emotional appeals are common bait after disasters. Give only through verified, official charity channels."
+    }
+  ];
+
+  var WORLDS = [
+    {
+      id:'office', title:'Office: Buay Tahan Tech Pte Ltd', subtitle:'Office Security Walkthrough',
+      desc:'Corporate cybersecurity across the office floor.',
+      mapLabel:'FLOOR PLAN 12×9 // BUAY TAHAN TECH PTE LTD',
+      exitIcon:'server', exitLabel:'Server Room', navIcon:'server',
+      accent:'#28c2d4', accentStrong:'#7fe4ee',
+      tech:true,
+      theme:{'--bg':'#070f18','--panel':'#0c1a27','--text':'#dde8ee','--text-dim':'#7f9bb0','--wall':'#4a7e99','--floor':'#0a1620','--grid-tint':'rgba(40,194,212,0.09)'},
+      briefingEyebrow:'&gt; FLOOR_BRIEFING', briefingTitle:'Welcome to Buay Tahan Tech',
+      briefingParas:[
+        'This is a walkthrough of a typical office floor. Six spots, like the pantry noticeboard and the login screen, are each hiding a quick security check.',
+        'Walk up to a checkpoint icon to answer its question. Once all 6 are answered correctly, the wall around the glowing master key fades away. Go collect it, and the Server Room door at the end of the floor unlocks.'
+      ],
+      cells: OFFICE_CELLS, start: OFFICE_START, exit: OFFICE_EXIT, checkpoints: OFFICE_CHECKPOINTS, keyPos: OFFICE_KEY, zones: OFFICE_ZONES, decor: OFFICE_DECOR, bank: OFFICE_BANK
+    },
+    {
+      id:'cafe', title:'Cafe: Kopi Theory', subtitle:'Personal Security at the Cafe',
+      desc:'Personal cybersecurity: wifi, passwords, and everyday habits.',
+      mapLabel:'CAFE LAYOUT 12×9 // KOPI THEORY',
+      exitIcon:'door', exitLabel:'Staff Room', navIcon:'wifi',
+      accent:'#e8a33d', accentStrong:'#ffcf7a',
+      cafe:true,
+      theme:{'--bg':'#170f0b','--panel':'#231812','--text':'#f5e8d8','--text-dim':'#b79c84','--wall':'#8c5b3b','--floor':'#2a1c14','--grid-tint':'rgba(232,163,61,0.05)'},
+      briefingEyebrow:'&gt; CAFE_BRIEFING', briefingTitle:'Welcome to Kopi Theory',
+      briefingParas:[
+        'This cafe is full of everyday personal security traps: shared wifi, phone chargers, smart speakers, and more. Six spots are each hiding a quick security check.',
+        'Walk up to a checkpoint icon to answer its question. Once all 6 are answered correctly, the wall around the glowing master key fades away. Go collect it, and the Staff Room door at the back unlocks.'
+      ],
+      cells: CAFE_CELLS, start: CAFE_START, exit: CAFE_EXIT, checkpoints: CAFE_CHECKPOINTS, keyPos: CAFE_KEY, zones: CAFE_ZONES, decor: CAFE_DECOR, bank: CAFE_BANK
+    },
+    {
+      id:'island', title:'Island: Coco Crab Club', subtitle:'Personal Security on the Island',
+      desc:'Personal cybersecurity: phishing, pretexting, and baiting.',
+      mapLabel:'ISLAND MAP 12×9 // COCO CRAB CLUB',
+      exitIcon:'boat', exitLabel:'Ferry Dock', navIcon:'boat',
+      accent:'#2dd4a7', accentStrong:'#8ff5d6',
+      hut:true,
+      theme:{'--bg':'#0f130d','--panel':'#181d14','--text':'#f1ecd6','--text-dim':'#aaa47c','--wall':'#c9a45c','--floor':'#1b2216','--grid-tint':'rgba(201,164,92,0.06)'},
+      briefingEyebrow:'&gt; ISLAND_BRIEFING', briefingTitle:'Welcome to Coco Crab Club',
+      briefingParas:[
+        'This island getaway, with its thatched coconut huts and bamboo walkways, is where phishing, pretexting, and baiting scams like to hide. Six spots are each hiding a quick security check.',
+        'Walk up to a checkpoint icon to answer its question. Once all 6 are answered correctly, the wall around the glowing master key fades away. Go collect it, and the Ferry Dock at the far end opens up.'
+      ],
+      cells: ISLAND_CELLS, start: ISLAND_START, exit: ISLAND_EXIT, checkpoints: ISLAND_CHECKPOINTS, keyPos: ISLAND_KEY, zones: ISLAND_ZONES, decor: ISLAND_DECOR, bank: ISLAND_BANK
+    }
+  ];
+  function worldById(id){
+    for (var i=0;i<WORLDS.length;i++) if (WORLDS[i].id === id) return WORLDS[i];
+    return WORLDS[0];
+  }
+
+  // ---------- Avatars (same proven silhouette, recoloured + a small distinct accessory) ----------
+  var AVATARS = [
+    { id:'magenta', label:'Magenta Bot', accent:'#ff3fa4',
+      accessory:'<path d="M24 6V2" stroke="%A%" stroke-width="1.4"/><circle cx="24" cy="2" r="1.6" fill="%A%" stroke="none"/>' },
+    { id:'amber', label:'Amber Bot', accent:'#ffb454',
+      accessory:'<rect x="17" y="13" width="14" height="3" rx="1" fill="none" stroke="%A%" stroke-width="1.2"/>' },
+    { id:'violet', label:'Violet Bot', accent:'#b98af5',
+      accessory:'<rect x="12.3" y="12" width="2.4" height="7" rx="0.5" fill="%A%" stroke="none"/><rect x="33.3" y="12" width="2.4" height="7" rx="0.5" fill="%A%" stroke="none"/>' },
+    { id:'green', label:'Green Bot', accent:'#8bd450',
+      accessory:'<path d="M18 6L19.2 2L20.4 6Z" fill="%A%" stroke="none"/><path d="M22.8 5.2L24 1.2L25.2 5.2Z" fill="%A%" stroke="none"/><path d="M27.6 6L28.8 2L30 6Z" fill="%A%" stroke="none"/>' }
+  ];
+  function avatarById(id){
+    for (var i=0;i<AVATARS.length;i++) if (AVATARS[i].id === id) return AVATARS[i];
+    return AVATARS[0];
+  }
+
+  // ---------- State ----------
+  var TERMINAL_COUNT = 6; // 6 quiz challenges per world
+  var state = {
+    pos: {x:START.x, y:START.y},
+    facing: 'right',
+    avatarId: AVATARS[0].id,
+    worldId: null,
+    terminals: [], // {x,y,solved,firstTry,attempted,question}
+    solvedCount: 0,
+    keyReady: false,    // true once all checkpoints are solved and the key appears
+    keyCollected: false,
+    exitOpen: false,
+    activeTerminalIndex: -1,
+    vault: {
+      office: {keys:0, cleared:false, firstTry:0},
+      cafe: {keys:0, cleared:false, firstTry:0},
+      island: {keys:0, cleared:false, firstTry:0}
+    }
+  };
+  function currentWorld(){ return worldById(state.worldId); }
+  function vaultTotalKeys(){
+    var sum = 0;
+    for (var id in state.vault) sum += state.vault[id].keys;
+    return sum;
+  }
+  function allWorldsCleared(){
+    for (var id in state.vault) if (!state.vault[id].cleared) return false;
+    return true;
+  }
+
+  var mazeEl = document.getElementById('maze');
+  var playerEl;
+
+  // ---------- Sound effects (Web Audio, no external files) ----------
+  var soundOn = true;
+  var audioCtx = null;
+  function ensureAudio(){
+    if (!audioCtx){
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      audioCtx = new Ctx();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function tone(freq, start, dur, type, peak){
+    var ctx = ensureAudio();
+    if (!ctx || !soundOn) return;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    var t0 = ctx.currentTime + start;
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(peak || 0.14, t0 + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+  }
+  function sfxWrong(){
+    tone(180, 0, 0.22, 'sawtooth', 0.11);
+    tone(140, 0.05, 0.22, 'sawtooth', 0.09);
+  }
+  function sfxCheckpoint(){
+    tone(523, 0, 0.14, 'triangle', 0.13);
+    tone(659, 0.09, 0.14, 'triangle', 0.13);
+    tone(784, 0.18, 0.22, 'triangle', 0.14);
+  }
+  function sfxWin(){
+    tone(523, 0, 0.16, 'triangle', 0.13);
+    tone(659, 0.12, 0.16, 'triangle', 0.13);
+    tone(784, 0.24, 0.16, 'triangle', 0.13);
+    tone(1047, 0.36, 0.34, 'triangle', 0.15);
+  }
+  function sfxKeyReady(){
+    tone(392, 0, 0.12, 'square', 0.1);
+    tone(587, 0.1, 0.12, 'square', 0.1);
+    tone(880, 0.2, 0.28, 'square', 0.13);
+  }
+  function updateSoundBtn(){
+    var btn = document.getElementById('soundBtn');
+    if (!btn) return;
+    btn.innerHTML = svgIcon(soundOn ? 'speakerOn' : 'speakerOff');
+    btn.setAttribute('aria-label', soundOn ? 'Mute sound effects' : 'Unmute sound effects');
+  }
+
+  // ---------- Background music (Web Audio, generated live, no external files) ----------
+  // Office: calm corporate instrumental. Cafe: swinging jazz trio. Island: strummed ukulele.
+  var musicOn = true;
+  var musicWorld = null;      // world whose music should be playing (null = silence)
+  var music = {timer:null, playing:null, gain:null, nextT:0, step:0, noise:null, lastLead:3};
+
+  function mtof(m){ return 440 * Math.pow(2, (m - 69) / 12); }
+
+  function noiseBuffer(ctx){
+    if (music.noise && music.noise.sampleRate === ctx.sampleRate) return music.noise;
+    var len = Math.floor(ctx.sampleRate * 0.5);
+    var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i=0;i<len;i++) d[i] = Math.random()*2 - 1;
+    music.noise = buf;
+    return buf;
+  }
+
+  // A plucked note: soft attack, quick decay, filter that closes as the note rings.
+  function mPluck(ctx, dest, t, freq, dur, vol, bright){
+    var o1 = ctx.createOscillator(), o2 = ctx.createOscillator();
+    var g = ctx.createGain(), f = ctx.createBiquadFilter();
+    o1.type = 'triangle'; o2.type = 'sine';
+    o1.frequency.value = freq; o2.frequency.value = freq * 2;
+    f.type = 'lowpass';
+    f.frequency.setValueAtTime(bright || 3200, t);
+    f.frequency.exponentialRampToValueAtTime(Math.max(500, (bright || 3200) * 0.25), t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    var g2 = ctx.createGain(); g2.gain.value = 0.35;
+    o1.connect(g); o2.connect(g2); g2.connect(g);
+    g.connect(f); f.connect(dest);
+    o1.start(t); o2.start(t); o1.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
+  }
+  // A held, slowly swelling pad note.
+  function mPad(ctx, dest, t, freq, dur, vol){
+    var o1 = ctx.createOscillator(), o2 = ctx.createOscillator();
+    var g = ctx.createGain();
+    o1.type = 'sine'; o2.type = 'triangle';
+    o1.frequency.value = freq; o2.frequency.value = freq; o2.detune.value = 5;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + Math.min(0.7, dur * 0.3));
+    g.gain.linearRampToValueAtTime(vol * 0.7, t + dur * 0.75);
+    g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    o1.connect(g); o2.connect(g); g.connect(dest);
+    o1.start(t); o2.start(t); o1.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
+  }
+  // Soft sine bass note.
+  function mBass(ctx, dest, t, freq, dur, vol){
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  // Soft kick drum: a sine that drops in pitch.
+  function mKick(ctx, dest, t, vol){
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(48, t + 0.12);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+    o.connect(g); g.connect(dest);
+    o.start(t); o.stop(t + 0.28);
+  }
+  // A short synth note (saw or square) through a resonant low-pass: tech bass and arpeggio.
+  function mSynth(ctx, dest, t, freq, dur, vol, type, cutoff, q){
+    var o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    o.type = type; o.frequency.value = freq;
+    f.type = 'lowpass'; f.Q.value = q || 1;
+    f.frequency.setValueAtTime(cutoff, t);
+    f.frequency.exponentialRampToValueAtTime(Math.max(200, cutoff * 0.3), t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(f); f.connect(g); g.connect(dest);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  // A short burst of filtered noise: hats, ride cymbal, shaker.
+  function mNoise(ctx, dest, t, dur, vol, hp, bp){
+    var s = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    s.buffer = noiseBuffer(ctx);
+    f.type = bp ? 'bandpass' : 'highpass';
+    f.frequency.value = bp || hp || 6000;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(dest);
+    s.start(t); s.stop(t + dur + 0.02);
+  }
+
+  var MUSIC_SPECS = {
+    // Office: upbeat tech groove. Four-on-the-floor kick, offbeat bass, clap, bright 16th-note synth arpeggio.
+    office: (function(){
+      var beat = 60 / 124;
+      var chords = [
+        {bass:45, v:[69,72,76,81]},   // Am
+        {bass:41, v:[65,69,72,77]},   // F
+        {bass:48, v:[67,72,76,79]},   // C
+        {bass:43, v:[67,71,74,79]}    // G
+      ];
+      var arp = [0,1,2,3,2,1,2,3, 0,1,2,3,3,2,1,2];
+      return {
+        level: 0.8, stepDur: beat / 4, stepsPerBar: 16, swing: 0,
+        play: function(ctx, dest, step, t){
+          var bar = Math.floor(step / 16), s = step % 16, c = chords[bar % 4];
+          if (s % 4 === 0) mKick(ctx, dest, t, 0.30);
+          if (s === 4 || s === 12) mNoise(ctx, dest, t, 0.12, 0.05, 0, 1900);
+          if (s % 4 === 2) mNoise(ctx, dest, t, 0.07, 0.03, 8000);
+          if (s % 2 === 1 && s % 4 !== 3) mNoise(ctx, dest, t, 0.03, 0.012, 9000);
+          // pulsing offbeat bass
+          if (s % 4 === 2 || s === 0 || s === 8) mSynth(ctx, dest, t, mtof(c.bass), beat * 0.4, 0.13, 'sawtooth', 520, 2);
+          // soft pad bed
+          if (s === 0){
+            for (var i=0;i<c.v.length;i++) mPad(ctx, dest, t, mtof(c.v[i] - 12), beat * 4, 0.022);
+          }
+          // 16th-note synth arpeggio, brighter in the second half of each 4-bar phrase
+          var open = (Math.floor(bar / 2) % 2 === 1) ? 3600 : 2400;
+          var oct = (s % 8 === 0) ? 12 : 0;
+          mSynth(ctx, dest, t, mtof(c.v[arp[s]] + oct), beat * 0.28, 0.045, 'square', open, 4);
+        }
+      };
+    })(),
+    // Cafe: happy bouncy groove. Light swing, backbeat, hopping bass, bright keys and a cheerful tune (C, G, Am, F).
+    cafe: (function(){
+      var beat = 60 / 126, swing = 0.56;
+      var chords = [
+        {bass:36, v:[64,67,72]},   // C
+        {bass:43, v:[62,67,71]},   // G
+        {bass:33, v:[60,64,69]},   // Am
+        {bass:41, v:[60,65,69]}    // F
+      ];
+      var tune = [
+        [[0,79,0.5],[2,76,0.5],[3,79,0.5],[4,81,0.9]],
+        [[0,79,0.5],[2,74,0.5],[3,79,0.5],[4,83,0.9]],
+        [[0,81,0.5],[2,76,0.5],[3,81,0.5],[4,84,0.9]],
+        [[0,81,0.5],[2,77,0.5],[3,79,0.5],[4,76,0.9],[6,74,0.4]]
+      ];
+      return {
+        level: 1.2, stepDur: beat / 2, stepsPerBar: 8, swing: swing,
+        play: function(ctx, dest, step, t){
+          var bar = Math.floor(step / 8), s = step % 8, c = chords[bar % 4];
+          // drums: kick on 1 and 3, snare backbeat on 2 and 4, hats on every 8th
+          if (s === 0 || s === 4) mKick(ctx, dest, t, 0.22);
+          if (s === 2 || s === 6){ mNoise(ctx, dest, t, 0.10, 0.04, 0, 1900); mBass(ctx, dest, t, 190, 0.07, 0.05); }
+          mNoise(ctx, dest, t, s % 2 === 0 ? 0.04 : 0.06, s % 2 === 0 ? 0.012 : 0.02, 8000);
+          // hopping bass
+          var bn = null;
+          if (s === 0) bn = c.bass; else if (s === 3) bn = c.bass + 7; else if (s === 4) bn = c.bass + 12; else if (s === 6) bn = c.bass + 7;
+          if (bn !== null) mBass(ctx, dest, t, mtof(bn), beat * 0.45, 0.16);
+          // bright keys on the offbeats
+          if (s % 2 === 1){
+            var strong = (s === 3 || s === 7) ? 0.04 : 0.024;
+            for (var i=0;i<c.v.length;i++) mPluck(ctx, dest, t, mtof(c.v[i]), beat * 0.35, strong, 3800);
+          }
+          // cheerful tune
+          var phrase = tune[bar % 4];
+          for (var j=0;j<phrase.length;j++){
+            if (phrase[j][0] === s) mPluck(ctx, dest, t, mtof(phrase[j][1]), beat * phrase[j][2] * 1.3, 0.06, 4600);
+          }
+        }
+      };
+    })(),
+    // Island: 8th-note strums on ukulele chords (C, Am, F, G) with a simple pentatonic tune and a shaker.
+    island: (function(){
+      var beat = 60 / 104;
+      var chords = [
+        {bass:36, v:[67,60,64,72]},   // C
+        {bass:33, v:[69,60,64,69]},   // Am
+        {bass:41, v:[69,60,65,69]},   // F
+        {bass:43, v:[67,62,67,71]}    // G
+      ];
+      // strum pattern per 8th: D = down, U = up, . = rest   (D . D U . U D U)
+      var strum = ['D','.','D','U','.','U','D','U'];
+      var tune = [
+        [[0,76,0.9],[4,79,0.5],[6,76,0.5]],
+        [[0,81,0.9],[3,79,0.5],[6,76,0.5]],
+        [[0,77,0.9],[4,76,0.5],[6,72,0.5]],
+        [[0,74,0.9],[3,76,0.5],[6,79,0.7]]
+      ];
+      return {
+        level: 1.3, stepDur: beat / 2, stepsPerBar: 8, swing: 0,
+        play: function(ctx, dest, step, t){
+          var bar = Math.floor(step / 8), s = step % 8, c = chords[bar % 4], k = strum[s];
+          if (k !== '.'){
+            var notes = c.v.slice().sort(function(a,b){ return a - b; });
+            if (k === 'U') notes.reverse();
+            for (var i=0;i<notes.length;i++){
+              mPluck(ctx, dest, t + i * 0.011, mtof(notes[i]), beat * 0.9, k === 'D' ? 0.06 : 0.04, 3800);
+            }
+          }
+          if (s === 0) mBass(ctx, dest, t, mtof(c.bass), beat * 1.6, 0.07);
+          if (s === 4) mBass(ctx, dest, t, mtof(c.bass + 7), beat * 1.2, 0.05);
+          if (s % 2 === 1) mNoise(ctx, dest, t, 0.06, 0.010, 6500);
+          var phrase = tune[bar % 4];
+          for (var j=0;j<phrase.length;j++){
+            if (phrase[j][0] === s) mPluck(ctx, dest, t, mtof(phrase[j][1]), beat * phrase[j][2] * 1.4, 0.06, 4200);
+          }
+        }
+      };
+    })()
+  };
+
+  // Schedules every step that falls inside the next ~0.35 seconds.
+  function musicTick(){
+    var ctx = audioCtx, spec = music.playing && MUSIC_SPECS[music.playing];
+    if (!ctx || !spec || !music.gain) return;
+    var guard = 0;
+    while (music.nextT < ctx.currentTime + 0.35 && guard++ < 16){
+      var swingOffset = (spec.swing && (music.step % 2 === 1)) ? (spec.swing - 0.5) * spec.stepDur * 2 : 0;
+      spec.play(ctx, music.gain, music.step, music.nextT + swingOffset);
+      music.nextT += spec.stepDur;
+      music.step++;
+    }
+  }
+
+  function stopMusicNow(){
+    if (music.timer){ clearInterval(music.timer); music.timer = null; }
+    var g = music.gain, ctx = audioCtx;
+    if (g && ctx){
+      try {
+        g.gain.cancelScheduledValues(ctx.currentTime);
+        g.gain.setValueAtTime(g.gain.value, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+        setTimeout(function(){ try { g.disconnect(); } catch(e){} }, 600);
+      } catch(e){}
+    }
+    music.gain = null;
+    music.playing = null;
+  }
+
+  function syncMusic(){
+    var wantPlay = soundOn && musicOn && musicWorld && MUSIC_SPECS[musicWorld];
+    if (!wantPlay){ stopMusicNow(); return; }
+    if (music.playing === musicWorld && music.timer) return;
+    var ctx = ensureAudio();
+    if (!ctx) return;
+    stopMusicNow();
+    var g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.5 * (MUSIC_SPECS[musicWorld].level || 1), ctx.currentTime + 1.2);
+    g.connect(ctx.destination);
+    music.gain = g;
+    music.playing = musicWorld;
+    music.step = 0;
+    music.lastLead = 3;
+    music.nextT = ctx.currentTime + 0.15;
+    music.timer = setInterval(musicTick, 80);
+    musicTick();
+  }
+  function setMusicWorld(id){ musicWorld = id; syncMusic(); }
+
+  function updateMusicBtn(){
+    var btn = document.getElementById('musicBtn');
+    if (!btn) return;
+    btn.innerHTML = svgIcon(musicOn ? 'music' : 'musicOff');
+    btn.setAttribute('aria-label', musicOn ? 'Turn music off' : 'Turn music on');
+    btn.setAttribute('aria-pressed', musicOn ? 'true' : 'false');
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    if (!audioCtx) return;
+    if (document.hidden) audioCtx.suspend();
+    else if (soundOn) audioCtx.resume();
+  });
+
+  function shuffledIndices(n){
+    var arr = [];
+    for (var i=0;i<n;i++) arr.push(i);
+    for (var j=arr.length-1;j>0;j--){
+      var k = Math.floor(Math.random()*(j+1));
+      var t = arr[j]; arr[j]=arr[k]; arr[k]=t;
+    }
+    return arr;
+  }
+
+  // Point the shared maze globals at the current world's own maze and icon layout.
+  function applyWorldLayout(){
+    var world = currentWorld();
+    CELLS = world.cells;
+    START = world.start;
+    EXIT = world.exit;
+    CHECKPOINT_POS = world.checkpoints;
+    KEY_TOKEN_POS = world.keyPos;
+  }
+
+  function setupTerminals(){
+    var world = currentWorld();
+    applyWorldLayout();
+    var bank = world.bank;
+    var order = shuffledIndices(bank.length).slice(0,TERMINAL_COUNT);
+    state.terminals = CHECKPOINT_POS.map(function(pos, i){
+      return {x:pos.x, y:pos.y, solved:false, firstTry:null, attempted:false, question: bank[order[i]]};
+    });
+    state.solvedCount = 0;
+    state.keyReady = false;
+    state.keyCollected = false;
+    state.exitOpen = false;
+  }
+
+  function playerSvg(avatarId){
+    var avatar = avatarById(avatarId || state.avatarId);
+    var a = avatar.accent;
+    var accessory = (avatar.accessory || '').split('%A%').join(a);
+    return '<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+      // head
+      '<rect x="14" y="6" width="20" height="16" rx="3" fill="var(--panel)" stroke="' + a + '" stroke-width="2"/>' +
+      accessory +
+      '<circle cx="19.5" cy="15" r="2" fill="' + a + '" stroke="none"/>' +
+      '<circle cx="28.5" cy="15" r="2" fill="' + a + '" stroke="none"/>' +
+      '<path d="M20 19.5H21M23.5 19.5H24.5M27 19.5H28" stroke="' + a + '" stroke-width="1.1"/>' +
+      // neck
+      '<rect x="21" y="22" width="6" height="3" fill="var(--wall)" stroke="' + a + '" stroke-width="1"/>' +
+      // torso
+      '<rect x="12" y="25" width="24" height="16" rx="2.5" fill="var(--panel)" stroke="' + a + '" stroke-width="2"/>' +
+      '<circle cx="24" cy="33" r="3.2" fill="var(--wall)" stroke="' + a + '" stroke-width="1.2"/>' +
+      '<path d="M24 31V35M22 33H26" stroke="' + a + '" stroke-width="1"/>' +
+      // arms
+      '<rect x="6" y="27" width="6" height="12" rx="1.5" fill="var(--wall)" stroke="' + a + '" stroke-width="1.3"/>' +
+      '<rect x="36" y="27" width="6" height="12" rx="1.5" fill="var(--wall)" stroke="' + a + '" stroke-width="1.3"/>' +
+      '<circle cx="9" cy="40" r="2" fill="' + a + '" stroke="none"/>' +
+      '<circle cx="39" cy="40" r="2" fill="' + a + '" stroke="none"/>' +
+      // legs
+      '<rect x="16" y="41" width="6" height="6" rx="1" fill="var(--wall)" stroke="' + a + '" stroke-width="1.2"/>' +
+      '<rect x="26" y="41" width="6" height="6" rx="1" fill="var(--wall)" stroke="' + a + '" stroke-width="1.2"/>' +
+      '</svg>';
+  }
+
+  function renderAvatarPicker(){
+    var wrap = document.getElementById('avatarPicker');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    AVATARS.forEach(function(avatar){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'avatar-option' + (state.avatarId === avatar.id ? ' selected' : '');
+      btn.setAttribute('aria-label', 'Choose ' + avatar.label + ' avatar');
+      btn.setAttribute('aria-pressed', state.avatarId === avatar.id ? 'true' : 'false');
+      btn.innerHTML = playerSvg(avatar.id);
+      btn.addEventListener('click', function(){
+        state.avatarId = avatar.id;
+        renderAvatarPicker();
+        if (playerEl) playerEl.innerHTML = playerSvg(state.avatarId);
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  function zoneIndexFor(x,y){
+    var zones = currentWorld().zones;
+    for (var i=0;i<zones.length;i++){
+      var z = zones[i];
+      if (x>=z.x0 && x<=z.x1 && y>=z.y0 && y<=z.y1) return i;
+    }
+    return 0;
+  }
+
+  // Cafe flooring per zone: checkered tile, wood planks, patio decking, concrete.
+  function cafeFloor(cell, x, y, zi){
+    var plank = 'linear-gradient(rgba(0,0,0,0.30) 1px, transparent 1px)';
+    if (zi === 0){ // Order Counter: checkered tile
+      cell.style.backgroundColor = ((x + y) % 2 === 0) ? '#44342a' : '#33251c';
+      cell.style.backgroundImage = 'none';
+    } else if (zi === 1){ // Study Nook: wood planks with staggered joints
+      cell.style.backgroundColor = '#3c2819';
+      cell.style.backgroundImage = plank + ',linear-gradient(90deg, rgba(0,0,0,0.28) 1px, transparent 1px)';
+      cell.style.backgroundSize = '100% 33.33%, 70% 33.33%';
+      cell.style.backgroundPosition = '0 0,' + ((x * 23 + y * 41) % 70) + '% 0';
+    } else if (zi === 2){ // Outdoor Patio: greenish decking boards
+      cell.style.backgroundColor = '#2b2f1f';
+      cell.style.backgroundImage = 'linear-gradient(90deg, rgba(0,0,0,0.32) 1px, transparent 1px)';
+      cell.style.backgroundSize = '33.33% 100%';
+      cell.style.backgroundPosition = '0 0';
+    } else { // Staff Corridor: plain concrete with speckle
+      cell.style.backgroundColor = '#2b2927';
+      cell.style.backgroundImage = 'radial-gradient(rgba(255,255,255,0.10) 0.7px, transparent 0.7px)';
+      cell.style.backgroundSize = '7px 7px';
+    }
+  }
+
+  // Small deterministic hash so details land in the same spots every game.
+  function cellHash(x, y, salt){
+    var h = (Math.imul(x + 17, 73856093) ^ Math.imul(y + 31, 19349663) ^ Math.imul(salt || 1, 83492791)) >>> 0;
+    return h % 100;
+  }
+  function addDetail(cell, cls){
+    var d = document.createElement('span');
+    d.className = cls;
+    cell.appendChild(d);
+  }
+
+  // Office flooring: carpet tiles in a different shade per zone, with seams, weave and floor ports.
+  function officeFloor(cell, x, y, zi){
+    var tones = [['#10202c','#142634'],['#12303b','#16394a'],['#161f2a','#1b2735'],['#1b2830','#213340']];
+    var t = tones[zi] || tones[0];
+    cell.style.backgroundColor = ((x + y) % 2 === 0) ? t[0] : t[1];
+    cell.style.backgroundImage = 'linear-gradient(rgba(0,0,0,0.38) 1px, transparent 1px),linear-gradient(90deg, rgba(0,0,0,0.38) 1px, transparent 1px),repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 4px)';
+    cell.style.backgroundSize = '50% 50%, 50% 50%, auto';
+    cell.style.backgroundPosition = '0 0, 0 0, 0 0';
+    if (cellHash(x, y, 5) < 9) addDetail(cell, 'floor-port');
+  }
+
+  // Island flooring: open ocean with waves, broken up by grassy patches.
+  function islandFloor(cell, x, y, zi){
+    var grass = cellHash(x >> 1, y >> 1, 3) < 42;
+    if (grass){
+      cell.style.backgroundColor = '#2b6a36';
+      cell.style.backgroundImage = 'radial-gradient(rgba(170,235,130,0.30) 1px, transparent 1.2px),radial-gradient(rgba(10,50,20,0.35) 1.4px, transparent 1.6px)';
+      cell.style.backgroundSize = '8px 8px, 11px 11px';
+      cell.style.backgroundPosition = ((x * 3 + y) % 8) + 'px ' + ((x + y * 3) % 8) + 'px, ' + ((x * 5 + y * 2) % 11) + 'px ' + ((y * 4) % 11) + 'px';
+    } else {
+      cell.style.backgroundColor = ((x + y) % 2 === 0) ? '#0e4a5e' : '#0f5368';
+      cell.style.backgroundImage = 'radial-gradient(ellipse at 50% 100%, transparent 58%, rgba(200,245,255,0.24) 60%, transparent 67%)';
+      cell.style.backgroundSize = '14px 9px';
+      cell.style.backgroundPosition = ((x * 5 + y * 3) % 14) + 'px ' + ((y * 4) % 9) + 'px';
+    }
+  }
+
+  function cafeFloorWithStains(cell, x, y, zi){
+    cafeFloor(cell, x, y, zi);
+    if (zi !== 3 && cellHash(x, y, 9) < 11) addDetail(cell, 'stain');
+  }
+
+  var FLOORS = {office:officeFloor, cafe:cafeFloorWithStains, island:islandFloor};
+
+  function buildMaze(){
+    mazeEl.innerHTML = '';
+    for (var y=0;y<H;y++){
+      for (var x=0;x<W;x++){
+        var c = CELLS[y][x];
+        var cell = document.createElement('div');
+        cell.className = 'cell';
+        var zi = zoneIndexFor(x,y);
+        var tint = (zi % 2 === 0)
+          ? 'var(--floor)'
+          : 'color-mix(in srgb, var(--floor) 90%, var(--accent) 10%)';
+        cell.style.background = tint;
+        cell.style.backgroundImage = 'radial-gradient(color-mix(in srgb, var(--wall) 30%, transparent) 0.6px, transparent 0.6px)';
+        cell.style.backgroundSize = '9px 9px';
+        var floorFn = FLOORS[currentWorld().id];
+        if (floorFn) floorFn(cell, x, y, zi);
+        cell.style.borderTop = (c.N ? '2px solid var(--wall)' : '2px solid transparent');
+        cell.style.borderLeft = (c.W ? '2px solid var(--wall)' : '2px solid transparent');
+        if (x === W-1) cell.style.borderRight = (c.E ? '2px solid var(--wall)' : '2px solid transparent');
+        if (y === H-1) cell.style.borderBottom = (c.S ? '2px solid var(--wall)' : '2px solid transparent');
+        cell.dataset.x = x; cell.dataset.y = y;
+        mazeEl.appendChild(cell);
+      }
+    }
+
+    var world = currentWorld();
+
+    // decorative flavor icons (static, non-interactive)
+    world.decor.forEach(function(d){
+      var wrap = document.createElement('div');
+      wrap.style.position = 'absolute';
+      wrap.style.left = (d.x/W*100) + '%';
+      wrap.style.top = (d.y/H*100) + '%';
+      wrap.style.width = (100/W) + '%';
+      wrap.style.height = (100/H) + '%';
+      var glyph = document.createElement('div');
+      glyph.className = 'decor';
+      glyph.innerHTML = svgIcon(d.icon);
+      wrap.appendChild(glyph);
+      mazeEl.appendChild(wrap);
+    });
+
+    // terminal + exit nodes, positioned absolutely as percentages.
+    // Each is a plain, unstyled placement wrapper sized to one cell; the
+    // visible circle is an inner element sized/positioned by the .node CSS.
+    state.terminals.forEach(function(t, i){
+      var outer = document.createElement('div');
+      outer.style.position = 'absolute';
+      outer.style.left = (t.x/W*100) + '%';
+      outer.style.top = (t.y/H*100) + '%';
+      outer.style.width = (100/W) + '%';
+      outer.style.height = (100/H) + '%';
+      var inner = document.createElement('div');
+      inner.className = 'node terminal';
+      inner.id = 'term-inner-' + i;
+      inner.innerHTML = t.question.emoji
+        ? '<span class="node-emoji" aria-hidden="true">' + t.question.emoji + '</span>'
+        : svgIcon(t.question.icon);
+      outer.appendChild(inner);
+      mazeEl.appendChild(outer);
+    });
+
+    // master key token: glowing key sealed behind a wall until every checkpoint is solved
+    var keyNode = document.createElement('div');
+    keyNode.style.position = 'absolute';
+    keyNode.style.left = (KEY_TOKEN_POS.x/W*100) + '%';
+    keyNode.style.top = (KEY_TOKEN_POS.y/H*100) + '%';
+    keyNode.style.width = (100/W) + '%';
+    keyNode.style.height = (100/H) + '%';
+    var keyInner = document.createElement('div');
+    keyInner.className = 'node key-token';
+    keyInner.id = 'keyTokenInner';
+    keyInner.innerHTML = svgIcon('key');
+    keyNode.appendChild(keyInner);
+    var keyWall = document.createElement('div');
+    keyWall.className = 'key-wall';
+    keyWall.id = 'keyWall';
+    keyNode.appendChild(keyWall);
+    mazeEl.appendChild(keyNode);
+
+    var exitNode = document.createElement('div');
+    exitNode.style.position = 'absolute';
+    exitNode.style.left = (EXIT.x/W*100) + '%';
+    exitNode.style.top = (EXIT.y/H*100) + '%';
+    exitNode.style.width = (100/W) + '%';
+    exitNode.style.height = (100/H) + '%';
+    var exitInner = document.createElement('div');
+    exitInner.className = 'node exit';
+    exitInner.id = 'exitInner';
+    exitInner.innerHTML = svgIcon(world.exitIcon);
+    exitNode.appendChild(exitInner);
+    mazeEl.appendChild(exitNode);
+
+    playerEl = document.createElement('div');
+    playerEl.className = 'player';
+    playerEl.innerHTML = playerSvg(state.avatarId);
+    mazeEl.appendChild(playerEl);
+
+    updatePlayerPosition(true);
+  }
+
+  function updatePlayerPosition(instant){
+    if (!playerEl) return;
+    if (instant) playerEl.style.transition = 'none';
+    playerEl.style.left = (state.pos.x/W*100) + '%';
+    playerEl.style.top = (state.pos.y/H*100) + '%';
+    if (instant) requestAnimationFrame(function(){ playerEl.style.transition = ''; });
+  }
+
+  function ripple(cellX, cellY, color){
+    var cx = (cellX + 0.5) / W * 100;
+    var cy = (cellY + 0.5) / H * 100;
+    var r = document.createElement('div');
+    r.className = 'ripple';
+    r.style.left = cx + '%';
+    r.style.top = cy + '%';
+    r.style.width = ((100/W) * 0.64) + '%';
+    r.style.height = ((100/H) * 0.64) + '%';
+    r.style.borderColor = color;
+    mazeEl.appendChild(r);
+    r.addEventListener('animationend', function(){ this.remove(); });
+  }
+
+  function burst(cellX, cellY, color, count){
+    count = count || 10;
+    var cx = (cellX + 0.5) / W * 100;
+    var cy = (cellY + 0.5) / H * 100;
+    for (var i=0;i<count;i++){
+      var p = document.createElement('div');
+      p.className = 'particle';
+      var angle = (i/count) * Math.PI * 2;
+      var dist = 22 + Math.random()*16;
+      p.style.setProperty('--dx', Math.cos(angle)*dist + 'px');
+      p.style.setProperty('--dy', Math.sin(angle)*dist + 'px');
+      p.style.left = cx + '%';
+      p.style.top = cy + '%';
+      p.style.background = color;
+      mazeEl.appendChild(p);
+      p.addEventListener('animationend', function(){ this.remove(); });
+    }
+  }
+
+  function terminalAt(x,y){
+    for (var i=0;i<state.terminals.length;i++){
+      var t = state.terminals[i];
+      if (t.x===x && t.y===y) return i;
+    }
+    return -1;
+  }
+
+  function canMove(dir){
+    var c = CELLS[state.pos.y][state.pos.x];
+    if (dir==='up') return !c.N;
+    if (dir==='down') return !c.S;
+    if (dir==='left') return !c.W;
+    if (dir==='right') return !c.E;
+    return false;
+  }
+
+  function isOverlayOpen(){
+    return quizEl.classList.contains('show') || briefingEl.classList.contains('show') ||
+      winEl.classList.contains('show') || worldSelectEl.classList.contains('show') ||
+      masteryEl.classList.contains('show');
+  }
+
+  function move(dir){
+    if (isOverlayOpen()) return;
+    if (!canMove(dir)) return;
+    var nx = state.pos.x + (dir==='right' ? 1 : dir==='left' ? -1 : 0);
+    var ny = state.pos.y + (dir==='down' ? 1 : dir==='up' ? -1 : 0);
+    if (!state.keyReady && nx === KEY_TOKEN_POS.x && ny === KEY_TOKEN_POS.y) return; // sealed behind the wall
+    if (dir==='up') state.pos.y -= 1;
+    if (dir==='down') state.pos.y += 1;
+    if (dir==='left') { state.pos.x -= 1; state.facing = 'left'; }
+    if (dir==='right') { state.pos.x += 1; state.facing = 'right'; }
+    updatePlayerPosition(false);
+    playerEl.classList.toggle('facing-left', state.facing === 'left');
+    playerEl.classList.remove('walking');
+    void playerEl.offsetWidth; // restart the step animation each move
+    playerEl.classList.add('walking');
+
+    var ti = terminalAt(state.pos.x, state.pos.y);
+    if (ti !== -1 && !state.terminals[ti].solved){
+      setTimeout(function(){ openQuiz(ti); }, 150);
+      return;
+    }
+    if (state.keyReady && !state.keyCollected && state.pos.x === KEY_TOKEN_POS.x && state.pos.y === KEY_TOKEN_POS.y){
+      setTimeout(collectKey, 150);
+      return;
+    }
+    if (state.exitOpen && state.pos.x === EXIT.x && state.pos.y === EXIT.y){
+      setTimeout(showWin, 150);
+    }
+  }
+
+  // ---------- Quiz overlay ----------
+  var quizEl = document.getElementById('quiz');
+  var quizTag = document.getElementById('quizTag');
+  var quizPrompt = document.getElementById('quizPrompt');
+  var quizOptions = document.getElementById('quizOptions');
+  var quizFeedback = document.getElementById('quizFeedback');
+  var quizContinue = document.getElementById('quizContinue');
+  var quizCard = document.getElementById('quizCard');
+
+  function openQuiz(index){
+    state.activeTerminalIndex = index;
+    var oldRetry = document.getElementById('retryBtnTemp');
+    if (oldRetry) oldRetry.remove();
+    var t = state.terminals[index];
+    quizTag.textContent = '> ' + t.question.station.toUpperCase();
+    quizPrompt.textContent = t.question.prompt;
+    quizOptions.innerHTML = '';
+    quizFeedback.hidden = true;
+    quizFeedback.className = 'feedback';
+    quizContinue.hidden = true;
+
+    t.question.options.forEach(function(opt, oi){
+      var b = document.createElement('button');
+      b.className = 'option';
+      b.type = 'button';
+      b.textContent = opt;
+      b.addEventListener('click', function(){ answerQuiz(oi); });
+      quizOptions.appendChild(b);
+    });
+
+    quizEl.classList.add('show');
+    var firstBtn = quizOptions.querySelector('button');
+    if (firstBtn) firstBtn.focus();
+  }
+
+  function answerQuiz(choiceIndex){
+    var t = state.terminals[state.activeTerminalIndex];
+    var buttons = quizOptions.querySelectorAll('button');
+    buttons.forEach(function(b){ b.disabled = true; });
+
+    var correct = choiceIndex === t.question.correct;
+    if (!t.attempted){
+      t.firstTry = correct;
+      t.attempted = true;
+    }
+
+    buttons[choiceIndex].classList.add(correct ? 'correct' : 'wrong');
+
+    quizFeedback.hidden = false;
+    quizFeedback.className = 'feedback ' + (correct ? 'ok' : 'no');
+    quizFeedback.textContent = (correct ? 'Correct. ' : 'Not quite. ') + t.question.explanation;
+
+    if (!correct){
+      sfxWrong();
+      quizCard.classList.add('shake');
+      setTimeout(function(){ quizCard.classList.remove('shake'); }, 320);
+      var retryBtn = document.createElement('button');
+      retryBtn.className = 'btn secondary';
+      retryBtn.textContent = 'Try again';
+      retryBtn.type = 'button';
+      retryBtn.addEventListener('click', function(){ openQuiz(state.activeTerminalIndex); });
+      quizFeedback.after(retryBtn);
+      quizContinue.hidden = true;
+      retryBtn.id = 'retryBtnTemp';
+    } else {
+      solveTerminal(state.activeTerminalIndex);
+      quizContinue.hidden = false;
+      quizContinue.focus();
+    }
+  }
+
+  function solveTerminal(index){
+    var t = state.terminals[index];
+    if (t.solved) return;
+    t.solved = true;
+    state.solvedCount++;
+    document.getElementById('solvedCount').textContent = state.solvedCount;
+    var inner = document.getElementById('term-inner-' + index);
+    if (inner) inner.classList.add('solved');
+    burst(t.x, t.y, 'var(--success)', 14);
+    ripple(t.x, t.y, 'var(--success)');
+    sfxCheckpoint();
+    if (state.solvedCount >= TERMINAL_COUNT && !state.keyReady){
+      state.keyReady = true;
+      var keyInner = document.getElementById('keyTokenInner');
+      if (keyInner){
+        keyInner.classList.add('active');
+      }
+      var keyWall = document.getElementById('keyWall');
+      if (keyWall) keyWall.classList.add('fade');
+      burst(KEY_TOKEN_POS.x, KEY_TOKEN_POS.y, '#ffd558', 16);
+      ripple(KEY_TOKEN_POS.x, KEY_TOKEN_POS.y, '#ffd558');
+      sfxKeyReady();
+    }
+    updateKeyStatusLabel();
+  }
+
+  function collectKey(){
+    if (!state.keyReady || state.keyCollected) return;
+    state.keyCollected = true;
+    var keyInner = document.getElementById('keyTokenInner');
+    if (keyInner){
+      keyInner.classList.remove('active');
+      keyInner.classList.add('collected');
+    }
+    burst(KEY_TOKEN_POS.x, KEY_TOKEN_POS.y, 'var(--success)', 16);
+    ripple(KEY_TOKEN_POS.x, KEY_TOKEN_POS.y, 'var(--success)');
+    sfxCheckpoint();
+    updateKeyStatusLabel();
+    state.exitOpen = true;
+    var exitInner = document.getElementById('exitInner');
+    if (exitInner) exitInner.classList.add('open');
+  }
+
+  function updateKeyStatusLabel(){
+    var el = document.getElementById('keyStatusLabel');
+    if (!el) return;
+    if (state.keyCollected) el.textContent = 'Key: Collected';
+    else if (state.keyReady) el.textContent = 'Key: Ready. Go get it!';
+    else el.textContent = 'Key: Locked';
+  }
+
+  quizContinue.addEventListener('click', function(){
+    closeQuiz();
+  });
+
+  function closeQuiz(){
+    quizEl.classList.remove('show');
+    var temp = document.getElementById('retryBtnTemp');
+    if (temp) temp.remove();
+    if (state.exitOpen && state.pos.x === EXIT.x && state.pos.y === EXIT.y){
+      setTimeout(showWin, 100);
+    }
+  }
+
+  // ---------- Briefing ----------
+  var briefingEl = document.getElementById('briefing');
+  document.getElementById('startBtn').addEventListener('click', function(){
+    briefingEl.classList.remove('show');
+  });
+  document.getElementById('helpBtn').addEventListener('click', function(){
+    if (!state.worldId){ showWorldSelect(); return; }
+    briefingEl.classList.add('show');
+  });
+  document.getElementById('briefingWorldsBtn').addEventListener('click', function(){
+    briefingEl.classList.remove('show');
+    showWorldSelect();
+  });
+  document.getElementById('briefingHero').innerHTML = svgIcon('shield');
+  document.getElementById('brandMark').innerHTML = svgIcon('shield');
+  updateSoundBtn();
+  updateMusicBtn();
+  document.getElementById('soundBtn').addEventListener('click', function(){
+    soundOn = !soundOn;
+    updateSoundBtn();
+    if (soundOn){ ensureAudio(); tone(659, 0, 0.1, 'triangle', 0.12); }
+    syncMusic();
+  });
+  document.getElementById('musicBtn').addEventListener('click', function(){
+    musicOn = !musicOn;
+    updateMusicBtn();
+    if (musicOn && soundOn) ensureAudio();
+    syncMusic();
+  });
+
+  // ---------- World select & vault progress ----------
+  var worldSelectEl = document.getElementById('worldSelect');
+  var worldListEl = document.getElementById('worldList');
+  var worldBackBtn = document.getElementById('worldBackBtn');
+  document.getElementById('worldSelectHero').innerHTML = svgIcon('vault');
+
+  function updateVaultProgressLabel(){
+    var label = document.getElementById('vaultProgressLabel');
+    if (label) label.textContent = 'VAULT PROGRESS: ' + vaultTotalKeys() + '/' + WORLDS.length + ' KEYS';
+  }
+
+  function renderWorldSelect(){
+    worldListEl.innerHTML = '';
+    WORLDS.forEach(function(world){
+      var v = state.vault[world.id];
+      var card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'world-card' + (v.cleared ? ' cleared' : '');
+      card.innerHTML =
+        '<div class="world-card-icon">' + svgIcon(world.navIcon) + '</div>' +
+        '<div class="world-card-text">' +
+          '<div class="world-card-kind mono">' + world.title.split(': ')[0].toUpperCase() + '</div>' +
+          '<div class="world-card-title" style="color:' + world.accent + '">' + world.title.split(': ').slice(1).join(': ') + '</div>' +
+          '<div class="world-card-desc">' + world.desc + '</div>' +
+          '<div class="world-card-progress">Keys: ' + v.keys + '/1</div>' +
+        '</div>' +
+        (v.cleared ? '<div class="world-card-badge">&#10003;</div>' : '');
+      card.addEventListener('click', function(){
+        enterWorld(world.id);
+      });
+      worldListEl.appendChild(card);
+    });
+    updateVaultProgressLabel();
+    worldBackBtn.style.display = state.worldId ? 'block' : 'none';
+  }
+
+  function showWorldSelect(){
+    setMusicWorld(null);
+    renderWorldSelect();
+    briefingEl.classList.remove('show');
+    winEl.classList.remove('show');
+    worldSelectEl.classList.add('show');
+  }
+  document.getElementById('worldsBtn').innerHTML = svgIcon('grid');
+  document.getElementById('worldsBtn').addEventListener('click', showWorldSelect);
+  worldBackBtn.addEventListener('click', function(){
+    worldSelectEl.classList.remove('show');
+  });
+
+  var DEFAULT_THEME = {'--bg':'#0b131b','--panel':'#101b26','--text':'#dde8ee','--text-dim':'#7d94a3','--wall':'#3a5568','--floor':'#0d1821','--grid-tint':'rgba(40,194,212,0.07)'};
+  function applyWorldTheme(){
+    var world = currentWorld();
+    for (var k in DEFAULT_THEME){
+      document.documentElement.style.setProperty(k, (world.theme && world.theme[k]) || DEFAULT_THEME[k]);
+    }
+    [['cafeAwning','cafe'],['cafeBoard','cafe'],['roofStrip','hut'],['hutBeam','hut'],['techStrip','tech'],['rackStrip','tech']].forEach(function(pair){
+      var el = document.getElementById(pair[0]);
+      if (el) el.classList.toggle('show', !!world[pair[1]]);
+    });
+    mazeEl.classList.toggle('office', !!world.tech);
+    mazeEl.classList.toggle('island', !!world.hut);
+    mazeEl.classList.toggle('cafe', !!world.cafe);
+    document.documentElement.style.setProperty('--accent', world.accent);
+    document.documentElement.style.setProperty('--accent-strong', world.accentStrong);
+    document.getElementById('hudTag').textContent = world.subtitle;
+    document.getElementById('mapLabel').innerHTML = world.mapLabel;
+    document.getElementById('legendExitName').textContent = world.exitLabel;
+    document.getElementById('legendExitName2').textContent = world.exitLabel;
+  }
+
+  function updateBriefingContent(){
+    var world = currentWorld();
+    document.getElementById('briefingEyebrow').innerHTML = world.briefingEyebrow;
+    document.getElementById('briefingTitle').textContent = world.briefingTitle;
+    var body = document.getElementById('briefingBody');
+    body.innerHTML = '';
+    world.briefingParas.forEach(function(p){
+      var para = document.createElement('p');
+      para.textContent = p;
+      body.appendChild(para);
+    });
+  }
+
+  function restartCurrentWorld(){
+    applyWorldLayout();
+    state.pos = {x:START.x, y:START.y};
+    state.facing = 'right';
+    setupTerminals();
+    document.getElementById('solvedCount').textContent = '0';
+    updateKeyStatusLabel();
+    buildMaze();
+    setMusicWorld(state.worldId);
+  }
+
+  function enterWorld(worldId){
+    state.worldId = worldId;
+    applyWorldTheme();
+    restartCurrentWorld();
+    renderAvatarPicker();
+    updateBriefingContent();
+    worldSelectEl.classList.remove('show');
+    winEl.classList.remove('show');
+    briefingEl.classList.add('show');
+  }
+
+  // ---------- Win / world-cleared screen ----------
+  var winEl = document.getElementById('winScreen');
+  function showWin(){
+    setMusicWorld(null);
+    sfxWin();
+    var world = currentWorld();
+    var firstTryCount = state.terminals.filter(function(t){ return t.firstTry; }).length;
+
+    // Bank this world's single master key into the vault.
+    state.vault[world.id].keys = 1;
+    state.vault[world.id].cleared = true;
+    state.vault[world.id].firstTry = firstTryCount;
+
+    document.getElementById('winTitle').textContent = world.title.split(': ').slice(1).join(': ') + ' Cleared';
+    document.getElementById('winSummary').textContent =
+      'All 6 checkpoints cleared and the master key collected. You’ve made it through the ' + world.exitLabel + '.';
+    document.getElementById('finalSolved').textContent = TERMINAL_COUNT + '/' + TERMINAL_COUNT;
+    document.getElementById('finalFirstTry').textContent = firstTryCount + '/' + TERMINAL_COUNT;
+    var recap = document.getElementById('recapList');
+    recap.innerHTML = '';
+    state.terminals.forEach(function(t){
+      var li = document.createElement('li');
+      li.textContent = t.question.explanation;
+      recap.appendChild(li);
+    });
+
+    var primaryBtn = document.getElementById('winPrimaryBtn');
+    if (allWorldsCleared()){
+      primaryBtn.textContent = 'Enter the Vault';
+      primaryBtn.onclick = function(){
+        winEl.classList.remove('show');
+        showMastery();
+      };
+    } else {
+      primaryBtn.textContent = 'Choose Next World';
+      primaryBtn.onclick = function(){
+        winEl.classList.remove('show');
+        showWorldSelect();
+      };
+    }
+
+    winEl.classList.add('show');
+  }
+  document.getElementById('playAgainBtn').addEventListener('click', function(){
+    winEl.classList.remove('show');
+    restartCurrentWorld();
+  });
+
+  // ---------- Mastery finale ----------
+  var masteryEl = document.getElementById('masteryScreen');
+  document.getElementById('masteryHero').innerHTML = svgIcon('trophy');
+  function showMastery(){
+    setMusicWorld(null);
+    var totalFirstTry = 0;
+    for (var id in state.vault) totalFirstTry += state.vault[id].firstTry;
+    document.getElementById('masteryKeys').textContent = vaultTotalKeys() + '/' + WORLDS.length;
+    document.getElementById('masteryFirstTry').textContent = totalFirstTry + '/' + (TERMINAL_COUNT * WORLDS.length);
+    masteryEl.classList.add('show');
+  }
+  document.getElementById('masteryCloseBtn').addEventListener('click', function(){
+    masteryEl.classList.remove('show');
+  });
+  document.getElementById('masteryReplayBtn').addEventListener('click', function(){
+    masteryEl.classList.remove('show');
+    state.vault = {
+      office: {keys:0, cleared:false, firstTry:0},
+      cafe: {keys:0, cleared:false, firstTry:0},
+      island: {keys:0, cleared:false, firstTry:0}
+    };
+    showWorldSelect();
+  });
+
+  // ---------- Controls ----------
+  document.addEventListener('keydown', function(e){
+    var map = {ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',
+      w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};
+    if (map[e.key]){
+      e.preventDefault();
+      move(map[e.key]);
+    }
+  });
+  // On-screen d-pad: tap to step, hold to keep walking.
+  (function(){
+    var pad = document.getElementById('dpad');
+    if (!pad) return;
+    var timer = null;
+    function stop(btn){
+      if (timer){ clearInterval(timer); timer = null; }
+      if (btn) btn.classList.remove('held');
+    }
+    pad.querySelectorAll('.dpad-btn').forEach(function(btn){
+      var dir = btn.getAttribute('data-dir');
+      btn.addEventListener('pointerdown', function(e){
+        e.preventDefault();
+        stop(btn);
+        btn.classList.add('held');
+        move(dir);
+        timer = setInterval(function(){ move(dir); }, 190);
+      });
+      ['pointerup','pointercancel','pointerleave'].forEach(function(ev){
+        btn.addEventListener(ev, function(){ stop(btn); });
+      });
+      btn.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+    });
+  })();
+
+  // ---------- Boot / hot reload ----------
+  function start(saved){
+    renderAvatarPicker();
+    showWorldSelect();
+  }
+  if (window.claude && window.claude.hot){
+    window.claude.hot.ready ? window.claude.hot.ready(start) : start(window.claude.hot.data || {});
+  } else {
+    start({});
+  }
+})();
+</script>
+
+</html>

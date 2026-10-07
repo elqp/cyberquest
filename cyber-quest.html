@@ -1,4 +1,4 @@
-<title>Cyber Quest</title>
+<title>Cyber Quest - Cybersecurity Corporate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -20,6 +20,7 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+  html{zoom:1.2;}
   *{box-sizing:border-box;}
   body{
     background:
@@ -96,24 +97,51 @@
     grid-template-columns:repeat(12,1fr);
     grid-template-rows:repeat(9,1fr);
     aspect-ratio:12/9;
+    container-type:inline-size;
     width:100%;
     background:var(--floor);
   }
   .cell{position:relative;}
-  .zone-chip{
-    position:absolute;
-    transform:translateY(-100%);
-    font-size:9px;
-    letter-spacing:1px;
-    color:var(--text-dim);
-    background:var(--panel);
-    border:1px solid var(--wall);
-    padding:2px 6px;
-    white-space:nowrap;
-    opacity:0.85;
-    pointer-events:none;
-    z-index:2;
+  /* Cafe-only dressing: striped awning with a neon OPEN sign above the map */
+  .cafe-awning{
+    display:none;position:relative;height:22px;margin-bottom:4px;border-radius:4px 4px 0 0;
+    background:
+      radial-gradient(circle at 50% 0, transparent 0, transparent 7px, #5a3a28 7px, #5a3a28 8px, transparent 8px) 0 100%/26px 9px repeat-x,
+      repeating-linear-gradient(90deg, #b8412f 0 26px, #f3e6d6 26px 52px);
+    box-shadow:0 3px 0 rgba(0,0,0,.25);
   }
+  .cafe-awning.show{display:block;}
+  /* Island-only: thatched coconut-hut roof with a bamboo frame */
+  .roof-strip{
+    display:none;height:22px;margin-bottom:3px;border-radius:4px 4px 0 0;
+    background:
+      conic-gradient(from -45deg at 50% 100%, #8a6a2c 90deg, transparent 90deg) 0 100%/14px 8px repeat-x,
+      repeating-linear-gradient(100deg, #8a6a2c 0 3px, #a8843c 3px 6px, #735524 6px 9px) 0 0/100% 15px no-repeat;
+  }
+  .roof-strip.show{display:block;}
+  .maze.island{box-shadow:inset 0 0 0 3px #b8934a, 0 0 0 3px #6b4f22, 0 0 0 5px #3b2c14;}
+  /* Office-only: secure-floor status bar with access LEDs */
+  .tech-strip{
+    display:none;align-items:center;justify-content:space-between;height:22px;margin-bottom:4px;padding:0 10px;
+    font-size:9px;letter-spacing:2px;color:var(--accent-strong);
+    background:linear-gradient(90deg,#0b2430,#0f3040);border:1px solid rgba(127,228,238,0.35);border-radius:3px;
+  }
+  .tech-strip.show{display:flex;}
+  .tech-strip .leds{display:flex;gap:6px;}
+  .tech-strip .leds i{display:block;width:7px;height:7px;border-radius:50%;background:#3ddc84;box-shadow:0 0 6px #3ddc84;animation:ledBlink 2.4s ease-in-out infinite;}
+  .tech-strip .leds i:nth-child(2){background:#ffd558;box-shadow:0 0 6px #ffd558;animation-delay:.6s;}
+  .tech-strip .leds i:nth-child(3){background:#28c2d4;box-shadow:0 0 6px #28c2d4;animation-delay:1.2s;}
+  @keyframes ledBlink{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .maze.office{box-shadow:inset 0 0 0 2px rgba(127,228,238,0.45), 0 0 16px rgba(40,194,212,0.22);}
+  .neon-open{
+    position:absolute;right:10px;top:100%;margin-top:6px;font-size:11px;font-weight:700;letter-spacing:3px;
+    color:#ffd9a0;padding:2px 8px;border:1.5px solid #ff8a5c;border-radius:4px;background:rgba(20,10,6,.85);
+    text-shadow:0 0 6px #ff8a5c,0 0 12px #ff6a3c;box-shadow:0 0 8px rgba(255,138,92,.55);
+    animation:neonFlicker 3.2s steps(1) infinite;z-index:4;
+  }
+  @keyframes neonFlicker{0%,100%{opacity:1;}46%{opacity:1;}47%{opacity:.55;}49%{opacity:1;}72%{opacity:.7;}74%{opacity:1;}}
+  .maze.cafe{box-shadow:inset 0 0 0 3px #5a3a28, 0 0 0 1px #2c1b12;}
+  .maze.cafe .decor{color:#c9a47c;opacity:.38;}
   .node{
     position:absolute;
     display:flex;align-items:center;justify-content:center;
@@ -122,6 +150,7 @@
     transition:background .25s, box-shadow .25s, transform .25s, color .25s;
   }
   .node svg{width:56%;height:56%;stroke:currentColor;}
+  .node-emoji{font-size:4.1cqw;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;}
   .node.terminal{
     color:var(--accent);
     background:color-mix(in srgb, var(--accent) 18%, var(--panel));
@@ -150,27 +179,41 @@
     animation:pulse 1.4s ease-in-out infinite;
   }
   .node.key-token{
-    color:var(--text-dim);
-    background:var(--panel);
-    border:1.5px solid var(--wall);
-    opacity:0.6;
+    color:#ffd558;
+    background:color-mix(in srgb, #ffd558 18%, var(--panel));
+    border:1.5px solid #ffd558;
+    box-shadow:0 0 14px color-mix(in srgb, #ffd558 65%, transparent), 0 0 26px color-mix(in srgb, #ffd558 30%, transparent);
+    animation:keyGlow 1.8s ease-in-out infinite;
   }
   .node.key-token.active{
-    color:#ffd558;
-    background:color-mix(in srgb, #ffd558 20%, var(--panel));
-    border-color:#ffd558;
-    box-shadow:0 0 12px color-mix(in srgb, #ffd558 55%, transparent);
-    opacity:1;
-    animation:pulse 1.3s ease-in-out infinite;
+    box-shadow:0 0 18px color-mix(in srgb, #ffd558 85%, transparent), 0 0 34px color-mix(in srgb, #ffd558 45%, transparent);
+    animation:pulse 1.2s ease-in-out infinite;
   }
   .node.key-token.collected{
     color:var(--success);
     background:color-mix(in srgb, var(--success) 20%, var(--panel));
     border-color:var(--success);
     box-shadow:0 0 9px color-mix(in srgb, var(--success) 40%, transparent);
-    opacity:1;
     animation:none;
   }
+  @keyframes keyGlow{
+    0%,100%{transform:scale(1);filter:brightness(1);}
+    50%{transform:scale(1.05);filter:brightness(1.25);}
+  }
+  .key-wall{
+    position:absolute;inset:3%;
+    background:
+      linear-gradient(var(--wall) 1.5px, transparent 1.5px) 0 0/100% 33.4%,
+      linear-gradient(90deg, var(--wall) 1.5px, transparent 1.5px) 0 0/50% 33.4%,
+      color-mix(in srgb, var(--panel) 82%, var(--wall) 18%);
+    border:2px solid var(--wall);
+    box-shadow:inset 0 0 8px rgba(0,0,0,0.55);
+    opacity:0.78;
+    transition:opacity 1.1s ease, transform 1.1s ease;
+    pointer-events:none;
+    z-index:3;
+  }
+  .key-wall.fade{opacity:0;transform:scale(1.18);}
   .decor{
     position:absolute;
     display:flex;align-items:center;justify-content:center;
@@ -185,7 +228,11 @@
     50%{transform:scale(1.1);}
   }
   @media (prefers-reduced-motion: reduce){
-    .node.terminal, .node.exit.open, .node.key-token.active{animation:none;}
+    .node.terminal, .node.exit.open, .node.key-token, .node.key-token.active{animation:none;}
+    .key-wall{transition:none;}
+    .neon-open{animation:none;}
+    .tech-strip .leds i{animation:none;}
+    .rack-strip i::after, .torch em, .cafe-awning::after, .roof-strip::after{animation:none;}
   }
 
   .player{
@@ -255,6 +302,86 @@
   .legend span{display:inline-flex;align-items:center;gap:6px;}
   .swatch{width:12px;height:12px;border-radius:50%;display:inline-block;}
 
+  /* On-screen controls: shown on touch devices and narrow screens */
+  .dpad{
+    display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,64px);gap:6px;
+    justify-content:center;margin:6px auto 0;user-select:none;-webkit-user-select:none;
+  }
+  .dpad-btn{
+    display:flex;align-items:center;justify-content:center;
+    background:var(--panel);color:var(--accent-strong);border:1.5px solid var(--accent);border-radius:14px;
+    box-shadow:0 0 10px color-mix(in srgb, var(--accent) 35%, transparent);
+    touch-action:none;-webkit-tap-highlight-color:transparent;padding:0;cursor:pointer;
+  }
+  .dpad-btn svg{width:34px;height:34px;pointer-events:none;}
+  .dpad-btn:active, .dpad-btn.held{background:color-mix(in srgb, var(--accent) 30%, var(--panel));transform:scale(0.95);}
+  .dpad-btn.up{grid-column:2;grid-row:1;}
+  .dpad-btn.left{grid-column:1;grid-row:2;}
+  .dpad-hub{grid-column:2;grid-row:2;}
+  .dpad-btn.right{grid-column:3;grid-row:2;}
+  .dpad-btn.down{grid-column:2;grid-row:3;}
+  /* Office: server-rack LED strip under the map */
+  .rack-strip{
+    display:none;gap:6px;height:16px;margin-top:5px;padding:4px 8px;border:1px solid rgba(127,228,238,0.35);border-radius:3px;
+    background:linear-gradient(90deg,#0b2430,#0f3040);
+  }
+  .rack-strip.show{display:flex;}
+  .rack-strip i{flex:1;border-radius:2px;background:rgba(127,228,238,0.14);box-shadow:inset 0 0 0 1px rgba(127,228,238,0.18);position:relative;}
+  .rack-strip i::after{content:'';position:absolute;right:3px;top:50%;width:4px;height:4px;margin-top:-2px;border-radius:50%;background:#3ddc84;box-shadow:0 0 5px #3ddc84;animation:ledBlink 2.4s ease-in-out infinite;}
+  .rack-strip i:nth-child(3n)::after{background:#ffd558;box-shadow:0 0 5px #ffd558;animation-delay:.5s;}
+  .rack-strip i:nth-child(4n+1)::after{background:#28c2d4;box-shadow:0 0 5px #28c2d4;animation-delay:1.1s;}
+  /* Office: floor power ports */
+  .floor-port{position:absolute;right:7px;bottom:7px;width:9px;height:9px;border:1px solid rgba(127,228,238,0.35);border-radius:2px;background:rgba(127,228,238,0.07);pointer-events:none;}
+  .floor-port::after{content:'';position:absolute;left:50%;top:50%;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:50%;background:rgba(127,228,238,0.55);}
+  /* Cafe: chalkboard menu, fairy lights, coffee-cup stains */
+  .cafe-board{
+    display:none;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 14px;margin-top:5px;padding:6px 10px;
+    font-size:10px;letter-spacing:1px;color:#efe6d2;background:#1b2822;border:3px solid #6b4a30;border-radius:4px;
+    box-shadow:inset 0 0 14px rgba(0,0,0,0.5);
+  }
+  .cafe-board.show{display:flex;}
+  .cafe-board b{color:#ffcf7a;letter-spacing:2px;}
+  .cafe-awning::after{
+    content:'';position:absolute;left:0;right:0;bottom:-6px;height:6px;pointer-events:none;
+    background:radial-gradient(circle, #ffe3a0 0, #ffe3a0 1.6px, rgba(255,200,100,0.35) 2.6px, transparent 3.4px) 0 0/22px 6px repeat-x;
+    animation:twinkle 2.8s ease-in-out infinite;
+  }
+  @keyframes twinkle{0%,100%{opacity:1;}50%{opacity:.55;}}
+  .stain{position:absolute;left:30%;top:28%;width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,220,170,0.13);pointer-events:none;}
+  .stain::after{content:'';position:absolute;inset:-5px 4px 12px -4px;border-radius:50%;border:1px solid rgba(255,220,170,0.08);}
+  /* Island: bamboo beam with tiki torches and a hammock */
+  .hut-beam{
+    display:none;align-items:flex-end;justify-content:space-between;height:38px;margin-top:5px;padding:0 14px;color:#d9b36a;
+    background:repeating-linear-gradient(90deg,#9c7a38 0 38px,#7c5e28 38px 40px) 0 0/100% 7px no-repeat;
+    position:relative;
+  }
+  .hut-beam.show{display:flex;}
+  .hut-beam .hammock{width:150px;height:30px;margin-bottom:2px;}
+  .torch{position:relative;width:5px;height:28px;border-radius:2px;background:linear-gradient(#8a6a2c,#5e451c);}
+  .torch em{
+    position:absolute;left:50%;top:-18px;width:14px;height:20px;margin-left:-7px;border-radius:50% 50% 50% 50% / 62% 62% 38% 38%;
+    background:radial-gradient(ellipse at 50% 70%, #fff3b0 0, #ffb347 45%, #ff6a2c 80%, transparent 100%);
+    box-shadow:0 0 12px 4px rgba(255,150,60,0.55);animation:flame 1.1s ease-in-out infinite alternate;
+  }
+  @keyframes flame{0%{transform:scale(1,1) rotate(-3deg);opacity:.95;}100%{transform:scale(0.88,1.12) rotate(3deg);opacity:.8;}}
+  .roof-strip{position:relative;}
+  .roof-strip::after{
+    content:'';position:absolute;left:0;right:0;bottom:-3px;height:6px;pointer-events:none;
+    background:radial-gradient(circle, #ffe9a8 0, #ffe9a8 1.5px, rgba(255,190,90,0.4) 2.6px, transparent 3.4px) 0 0/20px 6px repeat-x;
+    animation:twinkle 2.2s ease-in-out infinite;
+  }
+  .hint-touch{display:none;}
+  @media (pointer:coarse), (max-width:700px){ .hint-keys{display:none;} .hint-touch{display:inline;} }
+  /* On wide screens the control panel floats at the bottom right so it is always in reach */
+  @media (min-width:1000px) and (pointer:fine){
+    .dpad{
+      position:fixed;right:28px;bottom:24px;z-index:20;margin:0;padding:10px;
+      grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:5px;
+      background:color-mix(in srgb, var(--panel) 88%, transparent);border:1px solid var(--wall);border-radius:16px;
+      box-shadow:0 6px 24px rgba(0,0,0,0.45);
+    }
+    .dpad-btn svg{width:28px;height:28px;}
+  }
   .hint{text-align:center;font-size:12px;color:var(--text-dim);margin-top:8px;}
   kbd{font-family:'JetBrains Mono';background:var(--floor);border:1px solid var(--wall);padding:1px 6px;font-size:11px;}
 
@@ -270,7 +397,7 @@
   .card{
     background:var(--panel);border:1px solid var(--accent);
     max-width:440px;width:100%;padding:24px;position:relative;
-    max-height:88vh;overflow-y:auto;
+    max-height:calc(88vh / 1.2);overflow-y:auto;
     transform:scale(0.94) translateY(6px);
     transition:transform .22s cubic-bezier(.34,1.4,.64,1);
   }
@@ -299,10 +426,11 @@
   }
   .world-card:hover{border-color:var(--accent);}
   .world-card.cleared{border-color:var(--success);}
-  .world-card-icon{width:38px;height:38px;flex-shrink:0;color:var(--accent);}
+  .world-card-icon{width:46px;height:46px;flex-shrink:0;color:var(--accent);}
   .world-card-icon svg{width:100%;height:100%;}
   .world-card-text{flex:1;min-width:0;}
-  .world-card-title{font-family:'Orbitron';font-size:13px;letter-spacing:.5px;color:var(--text);}
+  .world-card-kind{font-size:10px;letter-spacing:2px;color:var(--text-dim);}
+  .world-card-title{font-family:'Orbitron';font-weight:800;font-size:22px;line-height:1.15;letter-spacing:.5px;color:var(--text);margin:2px 0 4px;text-shadow:0 0 12px color-mix(in srgb, currentColor 35%, transparent);}
   .world-card-desc{font-size:12.5px;color:var(--text-dim);margin-top:2px;line-height:1.4;}
   .world-card-progress{font-size:11px;letter-spacing:1px;color:var(--accent);margin-top:4px;text-transform:uppercase;}
   .world-card-badge{
@@ -350,6 +478,12 @@
   @media (max-width:400px){
     .card{padding:18px;}
   }
+  @media (max-width:480px){
+    .hud{padding:12px;}
+    .hud-right{gap:7px;}
+    .icon-btn{width:34px;height:34px;}
+    .counter .lbl{letter-spacing:1px;}
+  }
 </style>
 
 <div class="app">
@@ -369,6 +503,7 @@
         <div class="lbl" id="keyStatusLabel" style="margin-top:2px;">Key: Locked</div>
       </div>
       <button class="icon-btn" id="worldsBtn" aria-label="Choose a world" title="Worlds"></button>
+      <button class="icon-btn" id="musicBtn" aria-label="Turn music off" title="Toggle music"></button>
       <button class="icon-btn" id="soundBtn" aria-label="Mute sound effects" title="Toggle sound">
       </button>
       <button class="icon-btn" id="helpBtn" aria-label="Show floor briefing" title="Floor briefing">?</button>
@@ -378,17 +513,35 @@
   <div class="monitor">
     <span class="cornerlabel mono" id="mapLabel">FLOOR PLAN 12&times;9 // CYBER QUEST HQ</span>
     <div class="maze-wrap">
+      <div class="cafe-awning" id="cafeAwning" aria-hidden="true"><span class="neon-open mono">OPEN</span></div>
+      <div class="roof-strip" id="roofStrip" aria-hidden="true"></div>
+      <div class="tech-strip mono" id="techStrip" aria-hidden="true"><span>SECURE FLOOR // ACCESS LEVEL 1</span><span class="leds"><i></i><i></i><i></i></span></div>
       <div class="maze" id="maze" role="img" aria-label="World map. Use the arrow keys or WASD to move your avatar."></div>
+      <div class="rack-strip" id="rackStrip" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="cafe-board mono" id="cafeBoard" aria-hidden="true"><b>TODAY'S SPECIAL</b><span>&#9749; Flat white</span><span>&#129360; Croissant</span><span>&#127856; Cake</span></div>
+      <div class="hut-beam" id="hutBeam" aria-hidden="true">
+        <span class="torch"><em></em></span>
+        <svg class="hammock" viewBox="0 0 120 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2V24M114 2V24"/><path d="M6 6L34 20L86 20L114 6"/><path d="M34 20L38 14M50 20L52 14M62 20V14M74 20L72 14M86 20L82 14"/></svg>
+        <span class="torch"><em></em></span>
+      </div>
     </div>
     <div class="legend">
       <span><span class="swatch" style="background:var(--accent)"></span> Checkpoint to clear</span>
-      <span><span class="swatch" style="background:#ffd558"></span> Master key (unlocks after all 6)</span>
+      <span><span class="swatch" style="background:#ffd558"></span> Master key (sealed behind a wall until all 6 are answered)</span>
       <span><span class="swatch" style="background:var(--success)"></span> Key collected / <span id="legendExitName">Server Room</span> open</span>
       <span><span class="swatch" style="background:var(--text-dim)"></span> <span id="legendExitName2">Server Room</span> (locked)</span>
     </div>
   </div>
 
-  <p class="hint">Move with <kbd>&#8593;</kbd><kbd>&#8595;</kbd><kbd>&#8592;</kbd><kbd>&#8594;</kbd> or <kbd>WASD</kbd>. Walk into a checkpoint to answer its question.</p>
+  <div class="dpad" id="dpad" role="group" aria-label="On-screen controls">
+    <button type="button" class="dpad-btn up" data-dir="up" aria-label="Move up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15L12 8L18 15"/></svg></button>
+    <button type="button" class="dpad-btn left" data-dir="left" aria-label="Move left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6L8 12L15 18"/></svg></button>
+    <span class="dpad-hub" aria-hidden="true"></span>
+    <button type="button" class="dpad-btn right" data-dir="right" aria-label="Move right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6L16 12L9 18"/></svg></button>
+    <button type="button" class="dpad-btn down" data-dir="down" aria-label="Move down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9L12 16L18 9"/></svg></button>
+  </div>
+
+  <p class="hint"><span class="hint-keys">Move with <kbd>&#8593;</kbd><kbd>&#8595;</kbd><kbd>&#8592;</kbd><kbd>&#8594;</kbd> or <kbd>WASD</kbd>, or use the control panel. </span><span class="hint-touch">Tap or hold the arrows to move. </span>Walk into a checkpoint to answer its question.</p>
 
 </div>
 
@@ -398,7 +551,7 @@
     <div class="card-hero" id="worldSelectHero"></div>
     <span class="eyebrow mono" style="text-align:center;">&gt; VAULT_ACCESS</span>
     <h2 class="display">Choose Your World</h2>
-    <p>Collect 3 keys in each world to unlock the Security Gate and open the Vault Door.</p>
+    <p>Clear all 6 checkpoints in each world, then collect its master key, to unlock the Security Gate and open the Vault Door.</p>
     <p class="eyebrow mono" id="vaultProgressLabel" style="text-align:center;">VAULT PROGRESS: 0/3 KEYS</p>
     <div class="world-list" id="worldList"></div>
     <button class="btn secondary" id="worldBackBtn" style="display:none;width:100%;">Back to Game</button>
@@ -426,7 +579,7 @@
     <div class="card-hero" id="masteryHero"></div>
     <span class="eyebrow mono" style="text-align:center;">&gt; VAULT_UNLOCKED</span>
     <h2 class="display">Cybersecurity Mastery: Level 1</h2>
-    <p>All 9 keys are in. The Security Gate has opened, the Vault Door is unlocked, and you've cleared every world.</p>
+    <p>All 3 master keys are in. The Security Gate has opened, the Vault Door is unlocked, and you've cleared every world.</p>
     <div class="stat-row">
       <div class="stat"><div class="num" id="masteryKeys">3/3</div><div class="lbl">Keys collected</div></div>
       <div class="stat"><div class="num" id="masteryFirstTry">0/18</div><div class="lbl">First-try correct</div></div>
@@ -511,6 +664,17 @@
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2V5M12 19V22M2 12H5M19 12H22M4.5 4.5L6.5 6.5M17.5 17.5L19.5 19.5M4.5 19.5L6.5 17.5M17.5 6.5L19.5 4.5"/>',
     grid: '<rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/>',
     vault: '<rect x="3" y="3" width="18" height="18" rx="1.5"/><circle cx="12" cy="12" r="4"/><path d="M12 8V9M12 15V16M8 12H9M15 12H16"/>',
+    croissant: '<path d="M3 15L6 9L10 7L14 7L18 9L21 15L18 14L15 11L9 11L6 14Z"/><path d="M10 7L9 11M14 7L15 11"/>',
+    espresso: '<rect x="4" y="3" width="16" height="12" rx="1"/><path d="M4 7H20"/><path d="M10 10H14V13H10Z"/><path d="M6 15V20H18V15"/>',
+    table: '<rect x="4" y="6" width="16" height="3" rx="1.5"/><path d="M12 9V19M8 19H16"/>',
+    laptop: '<rect x="5" y="5" width="14" height="9" rx="1"/><path d="M3 18H21L19 14H5Z"/>',
+    pastryCase: '<rect x="3" y="8" width="18" height="11" rx="1"/><path d="M3 13H21"/><circle cx="8" cy="10.5" r="1"/><circle cx="12" cy="10.5" r="1"/><circle cx="16" cy="10.5" r="1"/>',
+    menuBoard: '<rect x="5" y="3" width="14" height="14" rx="1"/><path d="M8 7H16M8 10H16M8 13H13"/><path d="M8 17L6 21M16 17L18 21"/>',
+    wrench: '<circle cx="15" cy="9" r="4"/><path d="M12 12L5 19L7 21L14 14"/>',
+    passcode: '<rect x="3" y="7" width="18" height="10" rx="1.5"/><circle cx="8" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="1" fill="currentColor" stroke="none"/>',
+    person: '<circle cx="12" cy="8" r="4"/><path d="M4 21L6 15H18L20 21Z"/>',
+    music: '<path d="M9 18V5L19 3V16"/><path d="M9 9L19 7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="16" r="2"/>',
+    musicOff: '<path d="M9 18V5L19 3V16"/><path d="M9 9L19 7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="16" r="2"/><path d="M3 3L21 21"/>',
     trophy: '<path d="M7 4H17L15 12H9Z"/><path d="M7 6H4V9H7M17 6H20V9H17"/><path d="M12 12V17"/><path d="M8 20H16L15 17H9Z"/>'
   };
   function svgIcon(id){
@@ -518,9 +682,9 @@
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>';
   }
 
-  // ---------- Verified maze data (12x9, seeded generation, 0 unreachable cells) ----------
+  // ---------- Verified maze data (12x9 per world, seeded generation, 0 unreachable cells) ----------
   var W = 12, H = 9;
-  var CELLS = [
+  var OFFICE_CELLS = [
     [{"N":true,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":true}],
     [{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":false}],
     [{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":false,"S":false,"W":false},{"N":true,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":true,"W":true}],
@@ -531,20 +695,49 @@
     [{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":true},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true}],
     [{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false}]
   ];
-  var START = {x:0,y:0};
-  var EXIT = {x:11,y:0};
-  // 6 quiz checkpoints per world (verified-reachable), spread across zones.
-  var CHECKPOINT_POS = [{x:3,y:5},{x:4,y:5},{x:10,y:5},{x:9,y:4},{x:3,y:0},{x:7,y:0}];
-  // The master key: locked until all 6 checkpoints are answered correctly,
-  // then it appears here for the player to walk over and collect.
-  var KEY_TOKEN_POS = {x:10,y:0};
+  // Every world has its own maze, start and exit. These globals are re-pointed at the
+  // current world by applyWorldLayout() whenever a world is entered or restarted.
+  var CAFE_CELLS = [
+    [{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":true},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":false,"W":false}],
+    [{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":false,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false}],
+    [{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":true,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":true}]
+  ];
+  var ISLAND_CELLS = [
+    [{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":true,"W":true},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":true}],
+    [{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":false,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":false,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":true,"S":false,"W":true}],
+    [{"N":true,"E":false,"S":true,"W":true},{"N":false,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":true,"S":false,"W":false},{"N":true,"E":false,"S":true,"W":true},{"N":false,"E":true,"S":true,"W":false},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false}],
+    [{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":true,"S":false,"W":true},{"N":true,"E":false,"S":false,"W":true},{"N":true,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":true,"S":false,"W":false}],
+    [{"N":false,"E":true,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":true},{"N":false,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":true},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":true,"E":false,"S":true,"W":false},{"N":false,"E":true,"S":true,"W":false}]
+  ];
+  var OFFICE_START = {x:0,y:0}, OFFICE_EXIT = {x:11,y:0};
+  var CAFE_START = {x:11,y:8}, CAFE_EXIT = {x:0,y:0};
+  var ISLAND_START = {x:0,y:8}, ISLAND_EXIT = {x:11,y:0};
+  var CELLS = OFFICE_CELLS;
+  var START = OFFICE_START;
+  var EXIT = OFFICE_EXIT;
+  // 6 quiz checkpoints and 1 master key per world. Each world has its own layout
+  // (verified-reachable on that world's maze); applyWorldLayout() points these at the
+  // current world. The key stays locked until all 6 checkpoints are answered correctly.
+  var OFFICE_CHECKPOINTS = [{x:3,y:5},{x:4,y:5},{x:10,y:5},{x:9,y:4},{x:3,y:0},{x:7,y:0}];
+  var OFFICE_KEY = {x:10,y:0};
+  var CAFE_CHECKPOINTS = [{x:0,y:3},{x:7,y:4},{x:1,y:8},{x:8,y:6},{x:5,y:7},{x:6,y:6}];
+  var CAFE_KEY = {x:1,y:2};
+  var ISLAND_CHECKPOINTS = [{x:1,y:4},{x:6,y:0},{x:4,y:8},{x:11,y:6},{x:6,y:8},{x:0,y:1}];
+  var ISLAND_KEY = {x:5,y:7};
+  var CHECKPOINT_POS = OFFICE_CHECKPOINTS;
+  var KEY_TOKEN_POS = OFFICE_KEY;
 
   var OFFICE_DECOR = [
-    {x:0,y:2,icon:'plant'},
-    {x:2,y:7,icon:'coffee'},
-    {x:8,y:5,icon:'printer'},
-    {x:10,y:2,icon:'cabinet'},
-    {x:5,y:1,icon:'chair'}
   ];
   var OFFICE_ZONES = [
     {x0:0,x1:5,y0:0,y1:4,label:'IT WING'},
@@ -553,11 +746,6 @@
     {x0:6,x1:11,y0:5,y1:8,label:'PANTRY & BREAK AREA'}
   ];
   var CAFE_DECOR = [
-    {x:0,y:2,icon:'plant'},
-    {x:2,y:7,icon:'coffee'},
-    {x:8,y:5,icon:'wifi'},
-    {x:10,y:2,icon:'chair'},
-    {x:5,y:1,icon:'router'}
   ];
   var CAFE_ZONES = [
     {x0:0,x1:5,y0:0,y1:4,label:'ORDER COUNTER'},
@@ -566,23 +754,18 @@
     {x0:6,x1:11,y0:5,y1:8,label:'STAFF CORRIDOR'}
   ];
   var ISLAND_DECOR = [
-    {x:0,y:2,icon:'palm'},
-    {x:2,y:7,icon:'umbrella'},
-    {x:8,y:5,icon:'boat'},
-    {x:10,y:2,icon:'palm'},
-    {x:5,y:1,icon:'sun'}
   ];
   var ISLAND_ZONES = [
-    {x0:0,x1:5,y0:0,y1:4,label:'BEACH SHACK'},
-    {x0:6,x1:11,y0:0,y1:4,label:'DIVE SHOP'},
-    {x0:0,x1:5,y0:5,y1:8,label:'PALM GROVE'},
+    {x0:0,x1:5,y0:0,y1:4,label:'COCONUT BAR'},
+    {x0:6,x1:11,y0:0,y1:4,label:'FISHING HUT'},
+    {x0:0,x1:5,y0:5,y1:8,label:'HAMMOCK GROVE'},
     {x0:6,x1:11,y0:5,y1:8,label:'PIER & DOCKS'}
   ];
 
   // ---------- Worlds: each shares the same verified maze shape, reskinned ----------
   var OFFICE_BANK = [
     {
-      icon:'envelope', station:'Inbox Check',
+      icon:'envelope', emoji:'📧', station:'Inbox Check',
       prompt:"An email looks like it's from your bank, pushing you to click a link now or lose account access. Best first move?",
       options:[
         "Click the link and log in right away",
@@ -593,7 +776,7 @@
       explanation:"Banks don't lock accounts by email. Verify only through a number or app you already trust."
     },
     {
-      icon:'key', station:'IT Help Desk',
+      icon:'wrench', emoji:'💻', station:'IT Help Desk',
       prompt:"What keeps your work accounts safest?",
       options:[
         "One strong password used everywhere",
@@ -604,7 +787,7 @@
       explanation:"One leaked password can open every account if reused. A password manager makes unique passwords easy."
     },
     {
-      icon:'shield', station:'Login Screen',
+      icon:'shield', emoji:'🔐', station:'Login Screen',
       prompt:"Your company turns on two-factor login (MFA). Why does it help, even if your password leaks?",
       options:[
         "It makes your password longer",
@@ -615,7 +798,7 @@
       explanation:"Even with a stolen password, a thief usually can't get in without your phone too."
     },
     {
-      icon:'signal', station:'Client Meeting Room',
+      icon:'signal', emoji:'🤝', station:'Client Meeting Room',
       prompt:"You're on a client's guest wifi and need to check work email. Safer move?",
       options:[
         "Just connect, it's only for a bit",
@@ -626,7 +809,7 @@
       explanation:"Others on the same network can watch unencrypted traffic. A VPN keeps your connection private."
     },
     {
-      icon:'door', station:'Office Entrance',
+      icon:'door', emoji:'🚪', station:'Office Entrance',
       prompt:"Someone with no visible pass tags close behind you at the turnstile, saying they forgot their card. What do you do?",
       options:[
         "Let them in, it's polite",
@@ -637,7 +820,7 @@
       explanation:"This is tailgating. A friendly excuse is often all it takes to slip in. Every pass, every time."
     },
     {
-      icon:'usb', station:'Mailroom',
+      icon:'usb', emoji:'📬', station:'Mailroom',
       prompt:"An unlabeled USB drive marked “Bonus List 2026” sits on the mailroom counter. What's right?",
       options:[
         "Plug it into your laptop to check",
@@ -648,7 +831,7 @@
       explanation:"Unknown USB drives are a classic trap, and a tempting label is exactly the bait. Let IT check it safely."
     },
     {
-      icon:'plane', station:'Open-Plan Desk',
+      icon:'plane', emoji:'💼', station:'Open-Plan Desk',
       prompt:"A colleague asks you to send a client list to their personal Gmail so they can work on it tonight. What's right?",
       options:[
         "Send it, it's urgent",
@@ -659,7 +842,7 @@
       explanation:"Personal apps aren't secured to company standard. Client data should move through approved channels only."
     },
     {
-      icon:'phone', station:'Lift Lobby',
+      icon:'phone', emoji:'🛗', station:'Lift Lobby',
       prompt:"An SMS says “Your parcel is held, pay $2.50 to release it” with a link, but you aren't expecting one. Safest response?",
       options:[
         "Pay the small fee",
@@ -667,10 +850,10 @@
         "Delete it, and check deliveries only through the courier's official app"
       ],
       correct:2,
-      explanation:"This is smishing. A small, urgent fee is designed to feel too minor to question. Check deliveries only through official channels."
+      explanation:"This is phishing by text message. A small, urgent fee is designed to feel too minor to question. Check deliveries only through official channels."
     },
     {
-      icon:'qr', station:'Pantry Noticeboard',
+      icon:'qr', emoji:'📌', station:'Pantry Noticeboard',
       prompt:"A poster QR code offers a “free lucky draw” if you scan it and log in with your work email and password. What do you do?",
       options:[
         "Scan it, free prizes are worth a try",
@@ -681,7 +864,7 @@
       explanation:"QR codes hide the real link until scanned. A “log in to win” page is a common way to steal work credentials."
     },
     {
-      icon:'lock', station:'Hot-Desk Zone',
+      icon:'lock', emoji:'🪑', station:'Hot-Desk Zone',
       prompt:"You step away from your hot-desk for a 10-minute coffee break. Right habit?",
       options:[
         "Leave it, you'll be back soon",
@@ -692,7 +875,7 @@
       explanation:"An unlocked screen is an open door, even for ten minutes. Locking it closes that gap."
     },
     {
-      icon:'trash', station:'Print & Shred Corner',
+      icon:'trash', emoji:'🖨️', station:'Print & Shred Corner',
       prompt:"You printed a client contract by mistake and don't need the copy. What do you do with it?",
       options:[
         "Toss it in general recycling",
@@ -703,7 +886,7 @@
       explanation:"Recycling bins and desks aren't secure. Confidential paper should go through a shredder or a locked waste bin."
     },
     {
-      icon:'headset', station:'Support Line',
+      icon:'headset', emoji:'☎️', station:'Support Line',
       prompt:"A caller claims to be “Head Office IT” and asks you to read out the OTP that just landed on your phone. What do you do?",
       options:[
         "Read it out, they said they're IT",
@@ -717,7 +900,7 @@
 
   var CAFE_BANK = [
     {
-      icon:'wifi', station:'Free Wifi Login',
+      icon:'wifi', emoji:'🍽️', station:'Wifi Menu Card',
       prompt:"You see two cafe wifi networks with almost the same name, “Free_Cafe_WiFi” and “Free_Cafe_WiFi_2.” What's the safest move?",
       options:[
         "Join whichever connects faster",
@@ -728,7 +911,7 @@
       explanation:"Look-alike hotspots are a common trick to snoop on your traffic. Confirm the real network name with staff."
     },
     {
-      icon:'router', station:'Router Setup',
+      icon:'router', emoji:'🍳', station:'Kitchen Router',
       prompt:"You just got a new home wifi router. What's the most important first step?",
       options:[
         "Leave the default admin password as is",
@@ -739,7 +922,7 @@
       explanation:"Default router passwords are public knowledge. Changing them is the first real lock on your home network."
     },
     {
-      icon:'key', station:'Password Reuse',
+      icon:'passcode', emoji:'🧋', station:'Bubble Tea Bar',
       prompt:"You use the same password for your email, banking, and social media. What's the biggest risk?",
       options:[
         "Nothing, it's easier to remember",
@@ -750,7 +933,7 @@
       explanation:"One leaked password can unlock every account that shares it. Unique passwords limit the damage."
     },
     {
-      icon:'plug', station:'Free Charging Station',
+      icon:'plug', emoji:'🧃', station:'Juice & Charge Bar',
       prompt:"Your phone is low and a cafe offers a free public USB charging station. What's the safer choice?",
       options:[
         "Plug in and charge as normal",
@@ -761,7 +944,7 @@
       explanation:"Public USB ports can be rigged to steal data, known as juice jacking. A power bank avoids the data link entirely."
     },
     {
-      icon:'bluetooth', station:'Bluetooth Pairing',
+      icon:'bluetooth', emoji:'☕', station:'Coffee Corner',
       prompt:"Your headphones show an unfamiliar device asking to pair while you're in a cafe. What should you do?",
       options:[
         "Accept it, it's probably harmless",
@@ -772,7 +955,7 @@
       explanation:"Unknown pairing requests can be an attempt to access your device. Only accept ones you started yourself."
     },
     {
-      icon:'eye', station:'Shoulder Surfing',
+      icon:'eye', emoji:'🥐', station:'Pastry Queue',
       prompt:"You need to enter your banking PIN while someone stands close behind you in a queue. What's the right habit?",
       options:[
         "Type quickly so they can't see",
@@ -783,7 +966,7 @@
       explanation:"Shielding your PIN or password takes a second and blocks shoulder surfing completely."
     },
     {
-      icon:'key', station:'Saved Passwords',
+      icon:'laptop', emoji:'🗑️', station:'Clear-Up Station',
       prompt:"Your browser offers to save your password after every login. What's the safer habit?",
       options:[
         "Save everything in the browser for convenience",
@@ -794,7 +977,7 @@
       explanation:"A password manager encrypts your passwords properly, unlike basic browser storage on a shared device."
     },
     {
-      icon:'smartSpeaker', station:'Smart Speaker Setup',
+      icon:'smartSpeaker', emoji:'🍲', station:'Soup Station',
       prompt:"You've set up a smart speaker at home that's always listening for its wake word. What's a good privacy habit?",
       options:[
         "Leave all settings on default",
@@ -805,7 +988,7 @@
       explanation:"Checking privacy settings and muting the mic when it's not needed limits what the device can pick up."
     },
     {
-      icon:'screen', station:'Streaming Account Sharing',
+      icon:'screen', emoji:'🍰', station:'Cake Counter',
       prompt:"You've shared your streaming account password with several friends outside your household. What's the risk?",
       options:[
         "No risk, it's just a streaming account",
@@ -816,7 +999,7 @@
       explanation:"Every extra person who has your password is another way it can leak, especially if they reuse it elsewhere."
     },
     {
-      icon:'wifi', station:'Wifi Auto-Connect',
+      icon:'signal', emoji:'🍵', station:'Matcha Corner',
       prompt:"Your phone is set to auto-connect to any wifi network it's seen before. What's the safer setting?",
       options:[
         "Leave it on, it's convenient",
@@ -827,7 +1010,7 @@
       explanation:"Auto-connect can link you to a fake copycat network without you noticing."
     },
     {
-      icon:'lock', station:'One PIN for Everything',
+      icon:'lock', emoji:'💳', station:'Card Terminal',
       prompt:"You use the same PIN for your phone, banking app, and door access code. What's the concern?",
       options:[
         "It's fine, PINs are short anyway",
@@ -838,7 +1021,7 @@
       explanation:"A shared PIN means one moment of exposure compromises everything else that uses it."
     },
     {
-      icon:'pin', station:'Real-Time Location Sharing',
+      icon:'pin', emoji:'🪑', station:'Patio Seats',
       prompt:"You post your real-time location publicly while out with friends. What's the safer habit?",
       options:[
         "Keep it public so friends can find you",
@@ -852,7 +1035,7 @@
 
   var ISLAND_BANK = [
     {
-      icon:'envelope', station:'Inbox Surprise',
+      icon:'envelope', emoji:'🍾', station:'Bottle Message',
       prompt:"An email says you've won a prize and just need to enter your bank details to claim it. What do you do?",
       options:[
         "Enter the details to claim the prize",
@@ -863,7 +1046,7 @@
       explanation:"Legitimate prizes never ask for your bank details by email. This is a classic phishing lure."
     },
     {
-      icon:'envelope', station:'Familiar Sender',
+      icon:'person', emoji:'🦜', station:'Parrot Post',
       prompt:"An email looks like it's from a friend, asking you to click a link to see trip photos. Something feels off. Safest move?",
       options:[
         "Click it, it's from a friend",
@@ -871,10 +1054,10 @@
         "Forward it to other friends first"
       ],
       correct:1,
-      explanation:"Spear phishing fakes a familiar name to earn your trust. Confirm through a separate channel first."
+      explanation:"This is phishing. It fakes a familiar name to earn your trust. Confirm through a separate channel first."
     },
     {
-      icon:'phone', station:'Bank Hotline Call',
+      icon:'phone', emoji:'🐚', station:'Shell Phone',
       prompt:"Someone calls claiming to be your bank's fraud team, asking you to confirm your card number and OTP. What do you do?",
       options:[
         "Give the details, they said it's urgent",
@@ -882,10 +1065,10 @@
         "Give only the last 4 digits"
       ],
       correct:1,
-      explanation:"This is vishing, phishing by phone. Banks never ask for your OTP. Verify by calling the number on your card."
+      explanation:"This is phishing by phone. Banks never ask for your OTP. Verify by calling the number on your card."
     },
     {
-      icon:'chat', station:'Delivery Text',
+      icon:'chat', emoji:'⛵', station:'Boat Delivery',
       prompt:"A text with a link says a delivery couldn't be made and needs a small fee to redeliver. Safest response?",
       options:[
         "Click the link and pay the fee",
@@ -893,10 +1076,10 @@
         "Reply asking who sent it"
       ],
       correct:1,
-      explanation:"This is smishing. A small urgent fee is designed to feel too minor to question."
+      explanation:"This is phishing by text message. A small urgent fee is designed to feel too minor to question."
     },
     {
-      icon:'id', station:'Doorstep Caller',
+      icon:'door', emoji:'🌴', station:'Palm Hut Door',
       prompt:"Someone at your door says they're from the water company and needs your ID and a recent bill to “verify” your account. What do you do?",
       options:[
         "Show them your ID and bill",
@@ -907,7 +1090,7 @@
       explanation:"This is pretexting, a made-up reason to get your personal details. Verify with the company's official number."
     },
     {
-      icon:'id', station:'Official-Sounding Call',
+      icon:'headset', emoji:'⚓', station:'Coast Guard Call',
       prompt:"A caller says they're from a government agency and threatens a fine unless you confirm your ID number right now. What do you do?",
       options:[
         "Give the ID number to avoid the fine",
@@ -918,7 +1101,7 @@
       explanation:"Real agencies don't threaten instant fines by phone. The pressure is designed to stop you thinking it through."
     },
     {
-      icon:'usb', station:'Free Gift USB',
+      icon:'usb', emoji:'🎣', station:'Bait Shop',
       prompt:"You receive a free branded USB drive at an event with no idea who it's really from. What's the right move?",
       options:[
         "Plug it in to see what's on it",
@@ -929,7 +1112,7 @@
       explanation:"This is baiting. An unknown drive can carry malware the moment it's plugged in."
     },
     {
-      icon:'bag', station:'Too-Good Deal',
+      icon:'bag', emoji:'🐟', station:'Fish Market',
       prompt:"An ad offers a popular gadget at 90% off, only through a link, payable by bank transfer. Safest response?",
       options:[
         "Transfer the money before it sells out",
@@ -940,7 +1123,7 @@
       explanation:"Deals that seem too good to be true, with unusual payment methods, are common bait for scams."
     },
     {
-      icon:'gift', station:'Free Download Offer',
+      icon:'gift', emoji:'💰', station:'Treasure Chest',
       prompt:"A site offers a paid movie or app for free if you download their special player first. What do you do?",
       options:[
         "Download it, free content is worth it",
@@ -951,7 +1134,7 @@
       explanation:"Free downloads from unofficial sites are a classic way to install malware."
     },
     {
-      icon:'warning', station:'Pop-Up Warning',
+      icon:'warning', emoji:'🦈', station:'Shark Warning',
       prompt:"Your browser shows a pop-up saying your device is infected and to call a number immediately. Right move?",
       options:[
         "Call the number shown",
@@ -962,7 +1145,7 @@
       explanation:"This is scareware. Real security alerts don't ask you to call a random number."
     },
     {
-      icon:'qr', station:'Fun Quiz Link',
+      icon:'qr', emoji:'🐠', station:'Reef Quiz',
       prompt:"A social media quiz asks for your first pet's name, mother's maiden name, and birth town for “fun results.” What should you do?",
       options:[
         "Answer it, it's just a game",
@@ -973,7 +1156,7 @@
       explanation:"Quizzes like this quietly collect answers used to reset your accounts."
     },
     {
-      icon:'heart', station:'Disaster Appeal',
+      icon:'heart', emoji:'🌊', station:'Wave Appeal',
       prompt:"After a disaster, a social post asks for urgent donations through a personal bank transfer link. Safest response?",
       options:[
         "Transfer money right away to help",
@@ -987,43 +1170,49 @@
 
   var WORLDS = [
     {
-      id:'office', title:'Office: Data Vault', subtitle:'Office Security Walkthrough',
+      id:'office', title:'Office: Buay Tahan Tech Pte Ltd', subtitle:'Office Security Walkthrough',
       desc:'Corporate cybersecurity across the office floor.',
-      mapLabel:'FLOOR PLAN 12×9 // OFFICE: DATA VAULT',
+      mapLabel:'FLOOR PLAN 12×9 // BUAY TAHAN TECH PTE LTD',
       exitIcon:'server', exitLabel:'Server Room', navIcon:'server',
       accent:'#28c2d4', accentStrong:'#7fe4ee',
-      briefingEyebrow:'&gt; FLOOR_BRIEFING', briefingTitle:'Welcome to the Floor',
+      tech:true,
+      theme:{'--bg':'#070f18','--panel':'#0c1a27','--text':'#dde8ee','--text-dim':'#7f9bb0','--wall':'#4a7e99','--floor':'#0a1620','--grid-tint':'rgba(40,194,212,0.09)'},
+      briefingEyebrow:'&gt; FLOOR_BRIEFING', briefingTitle:'Welcome to Buay Tahan Tech',
       briefingParas:[
         'This is a walkthrough of a typical office floor. Six spots, like the pantry noticeboard and the login screen, are each hiding a quick security check.',
-        'Walk up to a checkpoint icon to answer its question. Once all 6 are answered correctly, a master key appears on the floor plan. Go collect it, and the Server Room door at the end of the floor unlocks.'
+        'Walk up to a checkpoint icon to answer its question. Once all 6 are answered correctly, the wall around the glowing master key fades away. Go collect it, and the Server Room door at the end of the floor unlocks.'
       ],
-      zones: OFFICE_ZONES, decor: OFFICE_DECOR, bank: OFFICE_BANK
+      cells: OFFICE_CELLS, start: OFFICE_START, exit: OFFICE_EXIT, checkpoints: OFFICE_CHECKPOINTS, keyPos: OFFICE_KEY, zones: OFFICE_ZONES, decor: OFFICE_DECOR, bank: OFFICE_BANK
     },
     {
-      id:'cafe', title:'Cafe: Hacker Hideout', subtitle:'Personal Security at the Cafe',
+      id:'cafe', title:'Cafe: Kopi Theory', subtitle:'Personal Security at the Cafe',
       desc:'Personal cybersecurity: wifi, passwords, and everyday habits.',
-      mapLabel:'CAFE LAYOUT 12×9 // HACKER HIDEOUT',
+      mapLabel:'CAFE LAYOUT 12×9 // KOPI THEORY',
       exitIcon:'door', exitLabel:'Staff Room', navIcon:'wifi',
       accent:'#e8a33d', accentStrong:'#ffcf7a',
-      briefingEyebrow:'&gt; CAFE_BRIEFING', briefingTitle:'Welcome to the Hideout',
+      cafe:true,
+      theme:{'--bg':'#170f0b','--panel':'#231812','--text':'#f5e8d8','--text-dim':'#b79c84','--wall':'#8c5b3b','--floor':'#2a1c14','--grid-tint':'rgba(232,163,61,0.05)'},
+      briefingEyebrow:'&gt; CAFE_BRIEFING', briefingTitle:'Welcome to Kopi Theory',
       briefingParas:[
         'This cafe is full of everyday personal security traps: shared wifi, phone chargers, smart speakers, and more. Six spots are each hiding a quick security check.',
-        'Walk up to a checkpoint icon to answer its question. Once all 6 are answered correctly, a master key appears in the cafe. Go collect it, and the Staff Room door at the back unlocks.'
+        'Walk up to a checkpoint icon to answer its question. Once all 6 are answered correctly, the wall around the glowing master key fades away. Go collect it, and the Staff Room door at the back unlocks.'
       ],
-      zones: CAFE_ZONES, decor: CAFE_DECOR, bank: CAFE_BANK
+      cells: CAFE_CELLS, start: CAFE_START, exit: CAFE_EXIT, checkpoints: CAFE_CHECKPOINTS, keyPos: CAFE_KEY, zones: CAFE_ZONES, decor: CAFE_DECOR, bank: CAFE_BANK
     },
     {
-      id:'island', title:'Island: Phishing Trip', subtitle:'Personal Security on the Island',
+      id:'island', title:'Island: Coco Crab Club', subtitle:'Personal Security on the Island',
       desc:'Personal cybersecurity: phishing, pretexting, and baiting.',
-      mapLabel:'ISLAND MAP 12×9 // PHISHING TRIP',
+      mapLabel:'ISLAND MAP 12×9 // COCO CRAB CLUB',
       exitIcon:'boat', exitLabel:'Ferry Dock', navIcon:'boat',
       accent:'#2dd4a7', accentStrong:'#8ff5d6',
-      briefingEyebrow:'&gt; ISLAND_BRIEFING', briefingTitle:'Welcome to the Island',
+      hut:true,
+      theme:{'--bg':'#0f130d','--panel':'#181d14','--text':'#f1ecd6','--text-dim':'#aaa47c','--wall':'#c9a45c','--floor':'#1b2216','--grid-tint':'rgba(201,164,92,0.06)'},
+      briefingEyebrow:'&gt; ISLAND_BRIEFING', briefingTitle:'Welcome to Coco Crab Club',
       briefingParas:[
-        'This island getaway is where phishing, pretexting, and baiting scams like to hide. Six spots along the island are each hiding a quick security check.',
-        'Walk up to a checkpoint icon to answer its question. Once all 6 are answered correctly, a master key appears on the island. Go collect it, and the Ferry Dock at the far end opens up.'
+        'This island getaway, with its thatched coconut huts and bamboo walkways, is where phishing, pretexting, and baiting scams like to hide. Six spots are each hiding a quick security check.',
+        'Walk up to a checkpoint icon to answer its question. Once all 6 are answered correctly, the wall around the glowing master key fades away. Go collect it, and the Ferry Dock at the far end opens up.'
       ],
-      zones: ISLAND_ZONES, decor: ISLAND_DECOR, bank: ISLAND_BANK
+      cells: ISLAND_CELLS, start: ISLAND_START, exit: ISLAND_EXIT, checkpoints: ISLAND_CHECKPOINTS, keyPos: ISLAND_KEY, zones: ISLAND_ZONES, decor: ISLAND_DECOR, bank: ISLAND_BANK
     }
   ];
   function worldById(id){
@@ -1135,6 +1324,275 @@
     btn.setAttribute('aria-label', soundOn ? 'Mute sound effects' : 'Unmute sound effects');
   }
 
+  // ---------- Background music (Web Audio, generated live, no external files) ----------
+  // Office: calm corporate instrumental. Cafe: swinging jazz trio. Island: strummed ukulele.
+  var musicOn = true;
+  var musicWorld = null;      // world whose music should be playing (null = silence)
+  var music = {timer:null, playing:null, gain:null, nextT:0, step:0, noise:null, lastLead:3};
+
+  function mtof(m){ return 440 * Math.pow(2, (m - 69) / 12); }
+
+  function noiseBuffer(ctx){
+    if (music.noise && music.noise.sampleRate === ctx.sampleRate) return music.noise;
+    var len = Math.floor(ctx.sampleRate * 0.5);
+    var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i=0;i<len;i++) d[i] = Math.random()*2 - 1;
+    music.noise = buf;
+    return buf;
+  }
+
+  // A plucked note: soft attack, quick decay, filter that closes as the note rings.
+  function mPluck(ctx, dest, t, freq, dur, vol, bright){
+    var o1 = ctx.createOscillator(), o2 = ctx.createOscillator();
+    var g = ctx.createGain(), f = ctx.createBiquadFilter();
+    o1.type = 'triangle'; o2.type = 'sine';
+    o1.frequency.value = freq; o2.frequency.value = freq * 2;
+    f.type = 'lowpass';
+    f.frequency.setValueAtTime(bright || 3200, t);
+    f.frequency.exponentialRampToValueAtTime(Math.max(500, (bright || 3200) * 0.25), t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    var g2 = ctx.createGain(); g2.gain.value = 0.35;
+    o1.connect(g); o2.connect(g2); g2.connect(g);
+    g.connect(f); f.connect(dest);
+    o1.start(t); o2.start(t); o1.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
+  }
+  // A held, slowly swelling pad note.
+  function mPad(ctx, dest, t, freq, dur, vol){
+    var o1 = ctx.createOscillator(), o2 = ctx.createOscillator();
+    var g = ctx.createGain();
+    o1.type = 'sine'; o2.type = 'triangle';
+    o1.frequency.value = freq; o2.frequency.value = freq; o2.detune.value = 5;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + Math.min(0.7, dur * 0.3));
+    g.gain.linearRampToValueAtTime(vol * 0.7, t + dur * 0.75);
+    g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    o1.connect(g); o2.connect(g); g.connect(dest);
+    o1.start(t); o2.start(t); o1.stop(t + dur + 0.05); o2.stop(t + dur + 0.05);
+  }
+  // Soft sine bass note.
+  function mBass(ctx, dest, t, freq, dur, vol){
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  // Soft kick drum: a sine that drops in pitch.
+  function mKick(ctx, dest, t, vol){
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(48, t + 0.12);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+    o.connect(g); g.connect(dest);
+    o.start(t); o.stop(t + 0.28);
+  }
+  // A short synth note (saw or square) through a resonant low-pass: tech bass and arpeggio.
+  function mSynth(ctx, dest, t, freq, dur, vol, type, cutoff, q){
+    var o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    o.type = type; o.frequency.value = freq;
+    f.type = 'lowpass'; f.Q.value = q || 1;
+    f.frequency.setValueAtTime(cutoff, t);
+    f.frequency.exponentialRampToValueAtTime(Math.max(200, cutoff * 0.3), t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(f); f.connect(g); g.connect(dest);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  // A short burst of filtered noise: hats, ride cymbal, shaker.
+  function mNoise(ctx, dest, t, dur, vol, hp, bp){
+    var s = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    s.buffer = noiseBuffer(ctx);
+    f.type = bp ? 'bandpass' : 'highpass';
+    f.frequency.value = bp || hp || 6000;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(dest);
+    s.start(t); s.stop(t + dur + 0.02);
+  }
+
+  var MUSIC_SPECS = {
+    // Office: upbeat tech groove. Four-on-the-floor kick, offbeat bass, clap, bright 16th-note synth arpeggio.
+    office: (function(){
+      var beat = 60 / 124;
+      var chords = [
+        {bass:45, v:[69,72,76,81]},   // Am
+        {bass:41, v:[65,69,72,77]},   // F
+        {bass:48, v:[67,72,76,79]},   // C
+        {bass:43, v:[67,71,74,79]}    // G
+      ];
+      var arp = [0,1,2,3,2,1,2,3, 0,1,2,3,3,2,1,2];
+      return {
+        level: 0.8, stepDur: beat / 4, stepsPerBar: 16, swing: 0,
+        play: function(ctx, dest, step, t){
+          var bar = Math.floor(step / 16), s = step % 16, c = chords[bar % 4];
+          if (s % 4 === 0) mKick(ctx, dest, t, 0.30);
+          if (s === 4 || s === 12) mNoise(ctx, dest, t, 0.12, 0.05, 0, 1900);
+          if (s % 4 === 2) mNoise(ctx, dest, t, 0.07, 0.03, 8000);
+          if (s % 2 === 1 && s % 4 !== 3) mNoise(ctx, dest, t, 0.03, 0.012, 9000);
+          // pulsing offbeat bass
+          if (s % 4 === 2 || s === 0 || s === 8) mSynth(ctx, dest, t, mtof(c.bass), beat * 0.4, 0.13, 'sawtooth', 520, 2);
+          // soft pad bed
+          if (s === 0){
+            for (var i=0;i<c.v.length;i++) mPad(ctx, dest, t, mtof(c.v[i] - 12), beat * 4, 0.022);
+          }
+          // 16th-note synth arpeggio, brighter in the second half of each 4-bar phrase
+          var open = (Math.floor(bar / 2) % 2 === 1) ? 3600 : 2400;
+          var oct = (s % 8 === 0) ? 12 : 0;
+          mSynth(ctx, dest, t, mtof(c.v[arp[s]] + oct), beat * 0.28, 0.045, 'square', open, 4);
+        }
+      };
+    })(),
+    // Cafe: happy bouncy groove. Light swing, backbeat, hopping bass, bright keys and a cheerful tune (C, G, Am, F).
+    cafe: (function(){
+      var beat = 60 / 126, swing = 0.56;
+      var chords = [
+        {bass:36, v:[64,67,72]},   // C
+        {bass:43, v:[62,67,71]},   // G
+        {bass:33, v:[60,64,69]},   // Am
+        {bass:41, v:[60,65,69]}    // F
+      ];
+      var tune = [
+        [[0,79,0.5],[2,76,0.5],[3,79,0.5],[4,81,0.9]],
+        [[0,79,0.5],[2,74,0.5],[3,79,0.5],[4,83,0.9]],
+        [[0,81,0.5],[2,76,0.5],[3,81,0.5],[4,84,0.9]],
+        [[0,81,0.5],[2,77,0.5],[3,79,0.5],[4,76,0.9],[6,74,0.4]]
+      ];
+      return {
+        level: 1.2, stepDur: beat / 2, stepsPerBar: 8, swing: swing,
+        play: function(ctx, dest, step, t){
+          var bar = Math.floor(step / 8), s = step % 8, c = chords[bar % 4];
+          // drums: kick on 1 and 3, snare backbeat on 2 and 4, hats on every 8th
+          if (s === 0 || s === 4) mKick(ctx, dest, t, 0.22);
+          if (s === 2 || s === 6){ mNoise(ctx, dest, t, 0.10, 0.04, 0, 1900); mBass(ctx, dest, t, 190, 0.07, 0.05); }
+          mNoise(ctx, dest, t, s % 2 === 0 ? 0.04 : 0.06, s % 2 === 0 ? 0.012 : 0.02, 8000);
+          // hopping bass
+          var bn = null;
+          if (s === 0) bn = c.bass; else if (s === 3) bn = c.bass + 7; else if (s === 4) bn = c.bass + 12; else if (s === 6) bn = c.bass + 7;
+          if (bn !== null) mBass(ctx, dest, t, mtof(bn), beat * 0.45, 0.16);
+          // bright keys on the offbeats
+          if (s % 2 === 1){
+            var strong = (s === 3 || s === 7) ? 0.04 : 0.024;
+            for (var i=0;i<c.v.length;i++) mPluck(ctx, dest, t, mtof(c.v[i]), beat * 0.35, strong, 3800);
+          }
+          // cheerful tune
+          var phrase = tune[bar % 4];
+          for (var j=0;j<phrase.length;j++){
+            if (phrase[j][0] === s) mPluck(ctx, dest, t, mtof(phrase[j][1]), beat * phrase[j][2] * 1.3, 0.06, 4600);
+          }
+        }
+      };
+    })(),
+    // Island: 8th-note strums on ukulele chords (C, Am, F, G) with a simple pentatonic tune and a shaker.
+    island: (function(){
+      var beat = 60 / 104;
+      var chords = [
+        {bass:36, v:[67,60,64,72]},   // C
+        {bass:33, v:[69,60,64,69]},   // Am
+        {bass:41, v:[69,60,65,69]},   // F
+        {bass:43, v:[67,62,67,71]}    // G
+      ];
+      // strum pattern per 8th: D = down, U = up, . = rest   (D . D U . U D U)
+      var strum = ['D','.','D','U','.','U','D','U'];
+      var tune = [
+        [[0,76,0.9],[4,79,0.5],[6,76,0.5]],
+        [[0,81,0.9],[3,79,0.5],[6,76,0.5]],
+        [[0,77,0.9],[4,76,0.5],[6,72,0.5]],
+        [[0,74,0.9],[3,76,0.5],[6,79,0.7]]
+      ];
+      return {
+        level: 1.3, stepDur: beat / 2, stepsPerBar: 8, swing: 0,
+        play: function(ctx, dest, step, t){
+          var bar = Math.floor(step / 8), s = step % 8, c = chords[bar % 4], k = strum[s];
+          if (k !== '.'){
+            var notes = c.v.slice().sort(function(a,b){ return a - b; });
+            if (k === 'U') notes.reverse();
+            for (var i=0;i<notes.length;i++){
+              mPluck(ctx, dest, t + i * 0.011, mtof(notes[i]), beat * 0.9, k === 'D' ? 0.06 : 0.04, 3800);
+            }
+          }
+          if (s === 0) mBass(ctx, dest, t, mtof(c.bass), beat * 1.6, 0.07);
+          if (s === 4) mBass(ctx, dest, t, mtof(c.bass + 7), beat * 1.2, 0.05);
+          if (s % 2 === 1) mNoise(ctx, dest, t, 0.06, 0.010, 6500);
+          var phrase = tune[bar % 4];
+          for (var j=0;j<phrase.length;j++){
+            if (phrase[j][0] === s) mPluck(ctx, dest, t, mtof(phrase[j][1]), beat * phrase[j][2] * 1.4, 0.06, 4200);
+          }
+        }
+      };
+    })()
+  };
+
+  // Schedules every step that falls inside the next ~0.35 seconds.
+  function musicTick(){
+    var ctx = audioCtx, spec = music.playing && MUSIC_SPECS[music.playing];
+    if (!ctx || !spec || !music.gain) return;
+    var guard = 0;
+    while (music.nextT < ctx.currentTime + 0.35 && guard++ < 16){
+      var swingOffset = (spec.swing && (music.step % 2 === 1)) ? (spec.swing - 0.5) * spec.stepDur * 2 : 0;
+      spec.play(ctx, music.gain, music.step, music.nextT + swingOffset);
+      music.nextT += spec.stepDur;
+      music.step++;
+    }
+  }
+
+  function stopMusicNow(){
+    if (music.timer){ clearInterval(music.timer); music.timer = null; }
+    var g = music.gain, ctx = audioCtx;
+    if (g && ctx){
+      try {
+        g.gain.cancelScheduledValues(ctx.currentTime);
+        g.gain.setValueAtTime(g.gain.value, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+        setTimeout(function(){ try { g.disconnect(); } catch(e){} }, 600);
+      } catch(e){}
+    }
+    music.gain = null;
+    music.playing = null;
+  }
+
+  function syncMusic(){
+    var wantPlay = soundOn && musicOn && musicWorld && MUSIC_SPECS[musicWorld];
+    if (!wantPlay){ stopMusicNow(); return; }
+    if (music.playing === musicWorld && music.timer) return;
+    var ctx = ensureAudio();
+    if (!ctx) return;
+    stopMusicNow();
+    var g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.5 * (MUSIC_SPECS[musicWorld].level || 1), ctx.currentTime + 1.2);
+    g.connect(ctx.destination);
+    music.gain = g;
+    music.playing = musicWorld;
+    music.step = 0;
+    music.lastLead = 3;
+    music.nextT = ctx.currentTime + 0.15;
+    music.timer = setInterval(musicTick, 80);
+    musicTick();
+  }
+  function setMusicWorld(id){ musicWorld = id; syncMusic(); }
+
+  function updateMusicBtn(){
+    var btn = document.getElementById('musicBtn');
+    if (!btn) return;
+    btn.innerHTML = svgIcon(musicOn ? 'music' : 'musicOff');
+    btn.setAttribute('aria-label', musicOn ? 'Turn music off' : 'Turn music on');
+    btn.setAttribute('aria-pressed', musicOn ? 'true' : 'false');
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    if (!audioCtx) return;
+    if (document.hidden) audioCtx.suspend();
+    else if (soundOn) audioCtx.resume();
+  });
+
   function shuffledIndices(n){
     var arr = [];
     for (var i=0;i<n;i++) arr.push(i);
@@ -1145,8 +1603,20 @@
     return arr;
   }
 
+  // Point the shared maze globals at the current world's own maze and icon layout.
+  function applyWorldLayout(){
+    var world = currentWorld();
+    CELLS = world.cells;
+    START = world.start;
+    EXIT = world.exit;
+    CHECKPOINT_POS = world.checkpoints;
+    KEY_TOKEN_POS = world.keyPos;
+  }
+
   function setupTerminals(){
-    var bank = currentWorld().bank;
+    var world = currentWorld();
+    applyWorldLayout();
+    var bank = world.bank;
     var order = shuffledIndices(bank.length).slice(0,TERMINAL_COUNT);
     state.terminals = CHECKPOINT_POS.map(function(pos, i){
       return {x:pos.x, y:pos.y, solved:false, firstTry:null, attempted:false, question: bank[order[i]]};
@@ -1214,6 +1684,74 @@
     return 0;
   }
 
+  // Cafe flooring per zone: checkered tile, wood planks, patio decking, concrete.
+  function cafeFloor(cell, x, y, zi){
+    var plank = 'linear-gradient(rgba(0,0,0,0.30) 1px, transparent 1px)';
+    if (zi === 0){ // Order Counter: checkered tile
+      cell.style.backgroundColor = ((x + y) % 2 === 0) ? '#44342a' : '#33251c';
+      cell.style.backgroundImage = 'none';
+    } else if (zi === 1){ // Study Nook: wood planks with staggered joints
+      cell.style.backgroundColor = '#3c2819';
+      cell.style.backgroundImage = plank + ',linear-gradient(90deg, rgba(0,0,0,0.28) 1px, transparent 1px)';
+      cell.style.backgroundSize = '100% 33.33%, 70% 33.33%';
+      cell.style.backgroundPosition = '0 0,' + ((x * 23 + y * 41) % 70) + '% 0';
+    } else if (zi === 2){ // Outdoor Patio: greenish decking boards
+      cell.style.backgroundColor = '#2b2f1f';
+      cell.style.backgroundImage = 'linear-gradient(90deg, rgba(0,0,0,0.32) 1px, transparent 1px)';
+      cell.style.backgroundSize = '33.33% 100%';
+      cell.style.backgroundPosition = '0 0';
+    } else { // Staff Corridor: plain concrete with speckle
+      cell.style.backgroundColor = '#2b2927';
+      cell.style.backgroundImage = 'radial-gradient(rgba(255,255,255,0.10) 0.7px, transparent 0.7px)';
+      cell.style.backgroundSize = '7px 7px';
+    }
+  }
+
+  // Small deterministic hash so details land in the same spots every game.
+  function cellHash(x, y, salt){
+    var h = (Math.imul(x + 17, 73856093) ^ Math.imul(y + 31, 19349663) ^ Math.imul(salt || 1, 83492791)) >>> 0;
+    return h % 100;
+  }
+  function addDetail(cell, cls){
+    var d = document.createElement('span');
+    d.className = cls;
+    cell.appendChild(d);
+  }
+
+  // Office flooring: carpet tiles in a different shade per zone, with seams, weave and floor ports.
+  function officeFloor(cell, x, y, zi){
+    var tones = [['#10202c','#142634'],['#12303b','#16394a'],['#161f2a','#1b2735'],['#1b2830','#213340']];
+    var t = tones[zi] || tones[0];
+    cell.style.backgroundColor = ((x + y) % 2 === 0) ? t[0] : t[1];
+    cell.style.backgroundImage = 'linear-gradient(rgba(0,0,0,0.38) 1px, transparent 1px),linear-gradient(90deg, rgba(0,0,0,0.38) 1px, transparent 1px),repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 4px)';
+    cell.style.backgroundSize = '50% 50%, 50% 50%, auto';
+    cell.style.backgroundPosition = '0 0, 0 0, 0 0';
+    if (cellHash(x, y, 5) < 9) addDetail(cell, 'floor-port');
+  }
+
+  // Island flooring: open ocean with waves, broken up by grassy patches.
+  function islandFloor(cell, x, y, zi){
+    var grass = cellHash(x >> 1, y >> 1, 3) < 42;
+    if (grass){
+      cell.style.backgroundColor = '#2b6a36';
+      cell.style.backgroundImage = 'radial-gradient(rgba(170,235,130,0.30) 1px, transparent 1.2px),radial-gradient(rgba(10,50,20,0.35) 1.4px, transparent 1.6px)';
+      cell.style.backgroundSize = '8px 8px, 11px 11px';
+      cell.style.backgroundPosition = ((x * 3 + y) % 8) + 'px ' + ((x + y * 3) % 8) + 'px, ' + ((x * 5 + y * 2) % 11) + 'px ' + ((y * 4) % 11) + 'px';
+    } else {
+      cell.style.backgroundColor = ((x + y) % 2 === 0) ? '#0e4a5e' : '#0f5368';
+      cell.style.backgroundImage = 'radial-gradient(ellipse at 50% 100%, transparent 58%, rgba(200,245,255,0.24) 60%, transparent 67%)';
+      cell.style.backgroundSize = '14px 9px';
+      cell.style.backgroundPosition = ((x * 5 + y * 3) % 14) + 'px ' + ((y * 4) % 9) + 'px';
+    }
+  }
+
+  function cafeFloorWithStains(cell, x, y, zi){
+    cafeFloor(cell, x, y, zi);
+    if (zi !== 3 && cellHash(x, y, 9) < 11) addDetail(cell, 'stain');
+  }
+
+  var FLOORS = {office:officeFloor, cafe:cafeFloorWithStains, island:islandFloor};
+
   function buildMaze(){
     mazeEl.innerHTML = '';
     for (var y=0;y<H;y++){
@@ -1228,6 +1766,8 @@
         cell.style.background = tint;
         cell.style.backgroundImage = 'radial-gradient(color-mix(in srgb, var(--wall) 30%, transparent) 0.6px, transparent 0.6px)';
         cell.style.backgroundSize = '9px 9px';
+        var floorFn = FLOORS[currentWorld().id];
+        if (floorFn) floorFn(cell, x, y, zi);
         cell.style.borderTop = (c.N ? '2px solid var(--wall)' : '2px solid transparent');
         cell.style.borderLeft = (c.W ? '2px solid var(--wall)' : '2px solid transparent');
         if (x === W-1) cell.style.borderRight = (c.E ? '2px solid var(--wall)' : '2px solid transparent');
@@ -1238,16 +1778,6 @@
     }
 
     var world = currentWorld();
-
-    // zone name chips (decorative, non-interactive)
-    world.zones.forEach(function(z){
-      var chip = document.createElement('div');
-      chip.className = 'zone-chip mono';
-      chip.textContent = z.label;
-      chip.style.left = (z.x0/W*100) + '%';
-      chip.style.top = (z.y0/H*100) + '%';
-      mazeEl.appendChild(chip);
-    });
 
     // decorative flavor icons (static, non-interactive)
     world.decor.forEach(function(d){
@@ -1277,12 +1807,14 @@
       var inner = document.createElement('div');
       inner.className = 'node terminal';
       inner.id = 'term-inner-' + i;
-      inner.innerHTML = svgIcon(t.question.icon);
+      inner.innerHTML = t.question.emoji
+        ? '<span class="node-emoji" aria-hidden="true">' + t.question.emoji + '</span>'
+        : svgIcon(t.question.icon);
       outer.appendChild(inner);
       mazeEl.appendChild(outer);
     });
 
-    // master key token, locked until every checkpoint is solved
+    // master key token: glowing key sealed behind a wall until every checkpoint is solved
     var keyNode = document.createElement('div');
     keyNode.style.position = 'absolute';
     keyNode.style.left = (KEY_TOKEN_POS.x/W*100) + '%';
@@ -1292,8 +1824,12 @@
     var keyInner = document.createElement('div');
     keyInner.className = 'node key-token';
     keyInner.id = 'keyTokenInner';
-    keyInner.innerHTML = svgIcon('lock');
+    keyInner.innerHTML = svgIcon('key');
     keyNode.appendChild(keyInner);
+    var keyWall = document.createElement('div');
+    keyWall.className = 'key-wall';
+    keyWall.id = 'keyWall';
+    keyNode.appendChild(keyWall);
     mazeEl.appendChild(keyNode);
 
     var exitNode = document.createElement('div');
@@ -1384,6 +1920,9 @@
   function move(dir){
     if (isOverlayOpen()) return;
     if (!canMove(dir)) return;
+    var nx = state.pos.x + (dir==='right' ? 1 : dir==='left' ? -1 : 0);
+    var ny = state.pos.y + (dir==='down' ? 1 : dir==='up' ? -1 : 0);
+    if (!state.keyReady && nx === KEY_TOKEN_POS.x && ny === KEY_TOKEN_POS.y) return; // sealed behind the wall
     if (dir==='up') state.pos.y -= 1;
     if (dir==='down') state.pos.y += 1;
     if (dir==='left') { state.pos.x -= 1; state.facing = 'left'; }
@@ -1495,8 +2034,9 @@
       var keyInner = document.getElementById('keyTokenInner');
       if (keyInner){
         keyInner.classList.add('active');
-        keyInner.innerHTML = svgIcon('key');
       }
+      var keyWall = document.getElementById('keyWall');
+      if (keyWall) keyWall.classList.add('fade');
       burst(KEY_TOKEN_POS.x, KEY_TOKEN_POS.y, '#ffd558', 16);
       ripple(KEY_TOKEN_POS.x, KEY_TOKEN_POS.y, '#ffd558');
       sfxKeyReady();
@@ -1525,7 +2065,7 @@
     var el = document.getElementById('keyStatusLabel');
     if (!el) return;
     if (state.keyCollected) el.textContent = 'Key: Collected';
-    else if (state.keyReady) el.textContent = 'Key: Ready — go get it!';
+    else if (state.keyReady) el.textContent = 'Key: Ready. Go get it!';
     else el.textContent = 'Key: Locked';
   }
 
@@ -1558,10 +2098,18 @@
   document.getElementById('briefingHero').innerHTML = svgIcon('shield');
   document.getElementById('brandMark').innerHTML = svgIcon('shield');
   updateSoundBtn();
+  updateMusicBtn();
   document.getElementById('soundBtn').addEventListener('click', function(){
     soundOn = !soundOn;
     updateSoundBtn();
     if (soundOn){ ensureAudio(); tone(659, 0, 0.1, 'triangle', 0.12); }
+    syncMusic();
+  });
+  document.getElementById('musicBtn').addEventListener('click', function(){
+    musicOn = !musicOn;
+    updateMusicBtn();
+    if (musicOn && soundOn) ensureAudio();
+    syncMusic();
   });
 
   // ---------- World select & vault progress ----------
@@ -1585,7 +2133,8 @@
       card.innerHTML =
         '<div class="world-card-icon">' + svgIcon(world.navIcon) + '</div>' +
         '<div class="world-card-text">' +
-          '<div class="world-card-title">' + world.title + '</div>' +
+          '<div class="world-card-kind mono">' + world.title.split(': ')[0].toUpperCase() + '</div>' +
+          '<div class="world-card-title" style="color:' + world.accent + '">' + world.title.split(': ').slice(1).join(': ') + '</div>' +
           '<div class="world-card-desc">' + world.desc + '</div>' +
           '<div class="world-card-progress">Keys: ' + v.keys + '/1</div>' +
         '</div>' +
@@ -1600,6 +2149,7 @@
   }
 
   function showWorldSelect(){
+    setMusicWorld(null);
     renderWorldSelect();
     briefingEl.classList.remove('show');
     winEl.classList.remove('show');
@@ -1611,8 +2161,19 @@
     worldSelectEl.classList.remove('show');
   });
 
+  var DEFAULT_THEME = {'--bg':'#0b131b','--panel':'#101b26','--text':'#dde8ee','--text-dim':'#7d94a3','--wall':'#3a5568','--floor':'#0d1821','--grid-tint':'rgba(40,194,212,0.07)'};
   function applyWorldTheme(){
     var world = currentWorld();
+    for (var k in DEFAULT_THEME){
+      document.documentElement.style.setProperty(k, (world.theme && world.theme[k]) || DEFAULT_THEME[k]);
+    }
+    [['cafeAwning','cafe'],['cafeBoard','cafe'],['roofStrip','hut'],['hutBeam','hut'],['techStrip','tech'],['rackStrip','tech']].forEach(function(pair){
+      var el = document.getElementById(pair[0]);
+      if (el) el.classList.toggle('show', !!world[pair[1]]);
+    });
+    mazeEl.classList.toggle('office', !!world.tech);
+    mazeEl.classList.toggle('island', !!world.hut);
+    mazeEl.classList.toggle('cafe', !!world.cafe);
     document.documentElement.style.setProperty('--accent', world.accent);
     document.documentElement.style.setProperty('--accent-strong', world.accentStrong);
     document.getElementById('hudTag').textContent = world.subtitle;
@@ -1635,12 +2196,14 @@
   }
 
   function restartCurrentWorld(){
+    applyWorldLayout();
     state.pos = {x:START.x, y:START.y};
     state.facing = 'right';
     setupTerminals();
     document.getElementById('solvedCount').textContent = '0';
     updateKeyStatusLabel();
     buildMaze();
+    setMusicWorld(state.worldId);
   }
 
   function enterWorld(worldId){
@@ -1657,6 +2220,7 @@
   // ---------- Win / world-cleared screen ----------
   var winEl = document.getElementById('winScreen');
   function showWin(){
+    setMusicWorld(null);
     sfxWin();
     var world = currentWorld();
     var firstTryCount = state.terminals.filter(function(t){ return t.firstTry; }).length;
@@ -1666,7 +2230,7 @@
     state.vault[world.id].cleared = true;
     state.vault[world.id].firstTry = firstTryCount;
 
-    document.getElementById('winTitle').textContent = world.title + ' Cleared';
+    document.getElementById('winTitle').textContent = world.title.split(': ').slice(1).join(': ') + ' Cleared';
     document.getElementById('winSummary').textContent =
       'All 6 checkpoints cleared and the master key collected. You’ve made it through the ' + world.exitLabel + '.';
     document.getElementById('finalSolved').textContent = TERMINAL_COUNT + '/' + TERMINAL_COUNT;
@@ -1705,6 +2269,7 @@
   var masteryEl = document.getElementById('masteryScreen');
   document.getElementById('masteryHero').innerHTML = svgIcon('trophy');
   function showMastery(){
+    setMusicWorld(null);
     var totalFirstTry = 0;
     for (var id in state.vault) totalFirstTry += state.vault[id].firstTry;
     document.getElementById('masteryKeys').textContent = vaultTotalKeys() + '/' + WORLDS.length;
@@ -1733,6 +2298,31 @@
       move(map[e.key]);
     }
   });
+  // On-screen d-pad: tap to step, hold to keep walking.
+  (function(){
+    var pad = document.getElementById('dpad');
+    if (!pad) return;
+    var timer = null;
+    function stop(btn){
+      if (timer){ clearInterval(timer); timer = null; }
+      if (btn) btn.classList.remove('held');
+    }
+    pad.querySelectorAll('.dpad-btn').forEach(function(btn){
+      var dir = btn.getAttribute('data-dir');
+      btn.addEventListener('pointerdown', function(e){
+        e.preventDefault();
+        stop(btn);
+        btn.classList.add('held');
+        move(dir);
+        timer = setInterval(function(){ move(dir); }, 190);
+      });
+      ['pointerup','pointercancel','pointerleave'].forEach(function(ev){
+        btn.addEventListener(ev, function(){ stop(btn); });
+      });
+      btn.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+    });
+  })();
+
   // ---------- Boot / hot reload ----------
   function start(saved){
     renderAvatarPicker();
